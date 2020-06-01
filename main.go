@@ -10,13 +10,14 @@ import (
 	"syscall"
 
 	"github.com/cynt4k/wygops/cmd"
+	"github.com/spf13/viper"
 )
 
 var (
 	//Version : Populated during build time
-	Version string
+	Version string = "Unknown"
 	//Build : Populated during build time
-	Build string
+	Build string = "Unknown"
 )
 
 func main() {
@@ -29,6 +30,12 @@ func main() {
 	log.Printf("starting wygops version: %s - build: %s", Version, Build)
 	shutdownCtx, shutdown := context.WithCancel(context.Background())
 	defer shutdown()
+
+	config := cmd.Config{}
+	err = viper.Unmarshal(&config)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	err = waitForInterrupt(shutdownCtx)
 	log.Printf("shuting down: %s", err)

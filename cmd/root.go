@@ -1,9 +1,13 @@
 package cmd
 
 import (
+	"log"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -25,12 +29,43 @@ func Execute() error {
 }
 
 func init() {
+	cobra.OnInitialize(initConfig)
 	rootCmd.SetHelpFunc(func(c *cobra.Command, args []string) {
 		c.Usage()
 		os.Exit(0)
 	})
 	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "config file")
-	// rootCmd.PostRun(func(c *cobra.Command, args []string) {
-	// 	os.Exit(0)
-	// })
+}
+
+func initConfig() {
+	viper.AutomaticEnv()
+
+	if configFile != "" {
+		viper.SetConfigFile(configFile)
+	} else {
+		fileDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+		if err != nil {
+			log.Fatal(err)
+		}
+		_configDir := filepath.Join(fileDir, "config")
+		viper.AddConfigPath(_configDir)
+
+		readDefaultConfig(_configDir)
+
+		switch env := strings.ToLower(os.Getenv("ENV")); env {
+		case "dev":
+			viper.SetConfigFile(filepath.Join(_configDir, "dev.yaml"))
+			break
+		case "prd":
+			viper.SetConfigFile(filepath.Join(_configDir, "prd.yaml"))
+		case "":
+			return
+		default:
+			log.Fatalf("unknown env variable %s", env)
+		}
+	}
+
+	if err := viper.MergeInConfig(); err != nil {
+		log.Fatalf("error while reading config %s", err)
+	}
 }

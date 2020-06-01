@@ -1,0 +1,17 @@
+general:
+  user:
+    maxDevices: 3
+database:
+  host: localhost
+  port: 3306
+  username: wygops
+  password: wygops
+  database: wygops
+provider:
+  ldap:
+    enabled: false
+    uri: ldap://localhost:389
+    bindDn: cn=Administrator,dc=wygops,dc=local
+    bindPassword: wygops
+    baseDn: cn=Users,dc=wygops,dc=local
+    groupFilter: "&(memberOf=cn=VPN-User,dc=wygops,dc=local)(object=person)"
