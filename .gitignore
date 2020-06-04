@@ -1,0 +1,5 @@
+.vscode
+bin/wygops
+vendor
+config/*
+!config/default.yaml
