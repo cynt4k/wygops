@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  mysql:
+    image: mariadb:10.5
+    restart: unless-stopped
+    ports:
+      - 3306:3306
+    environment: 
+      - MYSQL_ROOT_PASSWORD=wygops
+      - MYSQL_USER=wygops
+      - MYSQL_PASSWORD=wygops
+      - MYSQL_DATABASE=wygops

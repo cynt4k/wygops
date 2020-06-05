@@ -37,6 +37,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	err = serve()
+
+	if err != nil {
+		log.Fatalf("error while serving application %s", err)
+	}
+
 	err = waitForInterrupt(shutdownCtx)
 	log.Printf("shuting down: %s", err)
 }
