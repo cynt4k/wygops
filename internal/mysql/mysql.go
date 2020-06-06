@@ -2,9 +2,10 @@ package mysql
 
 import (
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/cynt4k/wygops/cmd"
-	"github.com/cynt4k/wygops/internal/models"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 )
@@ -29,8 +30,8 @@ func (c *mysql) init() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	if err := db.AutoMigrate(&models.User{}, &models.Device{}).Error; err != nil {
-		return nil, err
+	if strings.ToLower(os.Getenv("ENV")) == "dev" {
+		db.LogMode(true)
 	}
 
 	return db, err
