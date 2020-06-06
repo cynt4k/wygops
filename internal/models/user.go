@@ -6,21 +6,27 @@ import (
 	"time"
 
 	vd "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 )
 
 // User : User model
 type User struct {
-	gorm.Model
-	Username  string   `gorm:"size:100;not null;unique" json:"username"`
-	Password  string   `gorm:"size:100;not null" json:"password"`
-	FirstName string   `gorm:"size:100;not null" json:"firstName"`
-	LastName  string   `gorm:"size 100;not null" json:"lastName"`
-	Mail      string   `gorm:"size 100;not null" json:"mail"`
-	Type      string   `gorm:"size 50;not null" json:"type"`
-	Devices   []Device `gorm:"foreignkey:userId" json:"devices"`
-	Groups    []*Group `gorm:"many2many:groups;" json:"user_groups"`
+	ID        uint      `gorm:"primary_key"`
+	Username  string    `gorm:"size:100;not null;unique" json:"username"`
+	Password  string    `gorm:"size:100;not null" json:"password"`
+	FirstName string    `gorm:"size:100;not null" json:"firstName"`
+	LastName  string    `gorm:"size 100;not null" json:"lastName"`
+	Mail      string    `gorm:"size 100;not null" json:"mail"`
+	Type      string    `gorm:"size 50;not null" json:"type"`
+	Devices   []Device  `gorm:"foreignkey:userId" json:"devices"`
+	CreatedAt time.Time `gorm:"precision:6" json:"createdAt"`
+	UpdatedAt time.Time `gorm:"precision:6" json:"updatedAt"`
+	// Groups    []*Group `gorm:"many2many:groups;" json:"user_groups"`
+}
+
+// TableName : Get the table name
+func (*User) TableName() string {
+	return "user"
 }
 
 // Hash : Hash a string with an bcrypt hash function

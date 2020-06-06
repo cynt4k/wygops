@@ -4,4 +4,5 @@ package repository
 type Repository interface {
 	Sync() (bool, error)
 	UserRepository
+	GroupRepository
 }
