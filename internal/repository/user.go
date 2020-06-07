@@ -6,5 +6,6 @@ import "github.com/cynt4k/wygops/internal/models"
 type UserRepository interface {
 	CreateUser(*models.User) (*models.User, error)
 	GetUser(uint) (*models.User, error)
-	GetDevicesByUserID(uint) ([]models.Device, error)
+	GetUserWithDevices(uint) (*models.User, error)
+	DeleteUser(userID uint) error
 }

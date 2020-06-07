@@ -2,18 +2,22 @@ package models
 
 import (
 	"regexp"
+	"time"
 
 	vd "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/jinzhu/gorm"
 )
 
 // Device : Device model
 type Device struct {
-	gorm.Model
-	UserID      uint   `gorm:"" json:"userId"`
-	Name        string `gorm:"size:100;not null" json:"name"`
-	IPv4Address string `gorm:"size:15;not null" json:"ipv4Address"`
-	IPv6Address string `gorm:"size:29;not null" json:"ipv6Address"`
+	ID          uint      `gorm:"primary_key"`
+	UserID      uint      `gorm:"" json:"userId"`
+	Name        string    `gorm:"size:100;not null" json:"name"`
+	PrivateKey  string    `gorm:"size:255;not null" json:"privateKey"`
+	PublicKey   string    `gorm:"size:255;not null" json:"publicKey"`
+	IPv4Address string    `gorm:"size:15;not null" json:"ipv4Address"`
+	IPv6Address string    `gorm:"size:29;not null" json:"ipv6Address"`
+	CreatedAt   time.Time `gorm:"precision:6" json:"createdAt"`
+	UpdatedAt   time.Time `gorm:"precision:6" json:"updatedAt"`
 }
 
 // Validate : Validate a device model

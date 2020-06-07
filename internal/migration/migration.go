@@ -20,6 +20,12 @@ func Migrate(db *gorm.DB) error {
 			return err
 		}
 
+		for _, c := range AllForeignKeys() {
+			if err := db.Table(c[0]).AddForeignKey(c[1], c[2], c[3], c[4]).Error; err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
 

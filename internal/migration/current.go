@@ -19,3 +19,11 @@ func AllTables() []interface{} {
 		&models.Group{},
 	}
 }
+
+// AllForeignKeys : All current foreign keys
+func AllForeignKeys() [][5]string {
+	return [][5]string{
+		// Table, Key, Reference, OnDelete, OnUpdate
+		{"devices", "user_id", "user(id)", "CASCADE", "CASCADE"},
+	}
+}

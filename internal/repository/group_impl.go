@@ -5,7 +5,7 @@ import (
 
 	"github.com/cynt4k/wygops/internal/event"
 	"github.com/cynt4k/wygops/internal/models"
-	"github.com/cynt4k/wygops/internal/util/gormutil"
+	"github.com/cynt4k/wygops/pkg/util/gormutil"
 	"github.com/jinzhu/gorm"
 )
 
@@ -75,9 +75,58 @@ func (repo *GormRepository) AddUserToGroup(userID uint, groupID uint) error {
 	return nil
 }
 
+// RemoveUserFromGroup : Remove an user from an group
+func (repo *GormRepository) RemoveUserFromGroup(userID uint, groupID uint) error {
+	err := repo.db.Transaction(func(tx *gorm.DB) error {
+		var group models.Group
+		if err := tx.Scopes(userGroupPreloads).First(&group, &models.Group{ID: groupID}).Error; err != nil {
+			return convertError(err)
+		}
+
+		if group.IsMember(userID) {
+			if err := tx.Delete(&models.UserGroup{UserID: userID, GroupID: groupID}).Error; err != nil {
+				return err
+			}
+		}
+		return tx.Model(&group).UpdateColumn("updated_at", time.Now()).Error
+	})
+	return err
+}
+
+// DeleteGroup : Remove an group
+func (repo *GormRepository) DeleteGroup(groupID uint) error {
+	err := repo.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where(&models.UserGroup{GroupID: groupID}).Delete(&models.UserGroup{}).Error; err != nil {
+			return err
+		}
+		result := tx.Delete(&models.Group{ID: groupID})
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected == 0 {
+			return ErrNotFound
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	repo.bus.Publish(event.GroupDeleted, event.GroupDeletedEvent{
+		GroupID: groupID,
+	})
+	return nil
+}
+
 // GetGroup : Get the group
 func (repo *GormRepository) GetGroup(groupID uint) (*models.Group, error) {
-	group := models.Group{ID: groupID}
-	repo.db.Find(&group)
+	var group models.Group
+	if err := repo.db.Scopes(userGroupPreloads).First(&group, &models.Group{ID: groupID}).Error; err != nil {
+		return nil, convertError(err)
+	}
 	return &group, nil
+}
+
+func userGroupPreloads(db *gorm.DB) *gorm.DB {
+	return db.
+		Preload("Users")
 }
