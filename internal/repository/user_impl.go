@@ -4,7 +4,9 @@ import (
 	"github.com/cynt4k/wygops/internal/event"
 	"github.com/cynt4k/wygops/internal/models"
 	"github.com/cynt4k/wygops/pkg/util/gormutil"
+	"github.com/cynt4k/wygops/pkg/util/structs"
 	"github.com/jinzhu/gorm"
+	"github.com/leandro-lugaresi/hub"
 )
 
 // CreateUser : Create an user
@@ -27,9 +29,14 @@ func (repo *GormRepository) CreateUser(user *models.User) (*models.User, error) 
 		return nil, err
 	}
 
-	repo.bus.Publish(event.UserCreated, event.UserCreatedEvent{
+	msg, _ := structs.StructToMap(event.UserCreatedEvent{
 		UserID:   user.ID,
 		Username: user.Username,
+	})
+
+	repo.hub.Publish(hub.Message{
+		Name:   event.UserCreated,
+		Fields: msg,
 	})
 	return user, nil
 }
@@ -88,8 +95,14 @@ func (repo *GormRepository) DeleteUser(userID uint) error {
 	if err != nil {
 		return err
 	}
-	repo.bus.Publish(event.UserDeleted, event.UserDeletedEvent{
+
+	msg, _ := structs.StructToMap(event.UserDeletedEvent{
 		UserID: userID,
+	})
+
+	repo.hub.Publish(hub.Message{
+		Name:   event.UserDeleted,
+		Fields: msg,
 	})
 	return nil
 }

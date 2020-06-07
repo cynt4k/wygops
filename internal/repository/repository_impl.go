@@ -1,22 +1,22 @@
 package repository
 
 import (
-	evbus "github.com/asaskevich/EventBus"
 	"github.com/cynt4k/wygops/internal/migration"
 	"github.com/jinzhu/gorm"
+	"github.com/leandro-lugaresi/hub"
 )
 
 // GormRepository : Repository struct to handle
 type GormRepository struct {
 	db  *gorm.DB
-	bus evbus.Bus
+	hub *hub.Hub
 }
 
 // NewGormRepository : Create a new repository to handle orm operations
-func NewGormRepository(db *gorm.DB, bus *evbus.Bus) (Repository, error) {
+func NewGormRepository(db *gorm.DB, hub *hub.Hub) (Repository, error) {
 	repo := &GormRepository{
 		db:  db,
-		bus: *bus,
+		hub: hub,
 	}
 
 	return repo, nil

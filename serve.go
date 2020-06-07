@@ -3,15 +3,15 @@ package main
 import (
 	"log"
 
-	evbus "github.com/asaskevich/EventBus"
 	"github.com/cynt4k/wygops/internal/mysql"
 	"github.com/cynt4k/wygops/internal/repository"
+	"github.com/leandro-lugaresi/hub"
 )
 
 func serve() error {
 
 	// New Message bus
-	bus := evbus.New()
+	hub := hub.New()
 
 	log.Println("connecting to database...")
 	db, err := mysql.Init()
@@ -22,7 +22,7 @@ func serve() error {
 	log.Println("connection to database established")
 
 	log.Println("setting up repository...")
-	repo, err := repository.NewGormRepository(db, &bus)
+	repo, err := repository.NewGormRepository(db, hub)
 
 	if err != nil {
 		log.Fatalf("error while setting up repository %s", err)
