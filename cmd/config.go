@@ -2,9 +2,12 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/jinzhu/gorm"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 )
@@ -43,11 +46,19 @@ type ConfigProvider struct {
 	Ldap ConfigProviderLdap `yaml:"ldap"`
 }
 
+// ConfigAPI : Config struct for the api
+type ConfigAPI struct {
+	Host string `yaml:"host"`
+	Port int16  `yaml:"port"`
+}
+
 // Config type for the config file to be handeld
 type Config struct {
+	DevMode  bool           `yaml:"dev"`
 	General  ConfigGeneral  `yaml:"general"`
 	Database ConfigDatabase `yaml:"database"`
 	Provider ConfigProvider `yaml:"provider"`
+	API      ConfigAPI      `yaml:"api"`
 }
 
 var (
@@ -79,4 +90,22 @@ func readDefaultConfig(configDir string) error {
 	}
 
 	return nil
+}
+
+func (c Config) getDatabase() (*gorm.DB, error) {
+	engine, err := gorm.Open("mysql", fmt.Sprintf(
+		"%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=true",
+		c.Database.Username,
+		c.Database.Password,
+		c.Database.Host,
+		c.Database.Port,
+		c.Database.Database,
+	))
+	if err != nil {
+		return nil, err
+	}
+
+	engine.BlockGlobalUpdate(true)
+	engine.LogMode(c.DevMode)
+	return engine.Set("gorm:table_options", "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"), nil
 }

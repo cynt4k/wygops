@@ -3,7 +3,7 @@ module github.com/cynt4k/wygops
 go 1.14
 
 require (
-	github.com/asaskevich/EventBus v0.0.0-20200428142821-4fc0642a29f3
+	github.com/asaskevich/EventBus v0.0.0-20200428142821-4fc0642a29f3 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gin-contrib/zap v0.0.1
 	github.com/gin-gonic/gin v1.6.3

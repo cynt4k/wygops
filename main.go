@@ -37,7 +37,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = serve()
+	err = cmd.ServeServer()
 
 	if err != nil {
 		log.Fatalf("error while serving application %s", err)

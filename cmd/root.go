@@ -8,6 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var (
@@ -21,6 +23,7 @@ var (
 		SilenceUsage: true,
 		Run:          func(c *cobra.Command, args []string) {},
 	}
+	c *Config
 )
 
 // Execute : Run the cmd parser
@@ -59,6 +62,9 @@ func initConfig() {
 		case "prd":
 			viper.SetConfigFile(filepath.Join(_configDir, "prd.yaml"))
 		case "":
+			if err := viper.Unmarshal(&c); err != nil {
+				log.Fatalf("error while unmarshal config %s", err)
+			}
 			return
 		default:
 			log.Fatalf("unknown env variable %s", env)
@@ -68,4 +74,48 @@ func initConfig() {
 	if err := viper.MergeInConfig(); err != nil {
 		log.Fatalf("error while reading config %s", err)
 	}
+
+	if err := viper.Unmarshal(&c); err != nil {
+		log.Fatalf("error while unmarshal config %s", err)
+	}
+	if os.Getenv("ENV") == "dev" {
+		viper.Set("DevMode", true)
+		c.DevMode = true
+	}
+}
+
+func getLogger() (logger *zap.Logger) {
+	if c.DevMode {
+		return getCLILogger()
+	}
+	return getCLILogger()
+}
+
+func getCLILogger() (logger *zap.Logger) {
+	level := zap.NewAtomicLevel()
+	if c.DevMode {
+
+	}
+	cfg := zap.Config{
+		Level:       level,
+		Development: c.DevMode,
+		Encoding:    "console",
+		EncoderConfig: zapcore.EncoderConfig{
+			TimeKey:        "T",
+			LevelKey:       "L",
+			NameKey:        "N",
+			CallerKey:      "C",
+			MessageKey:     "M",
+			StacktraceKey:  "S",
+			LineEnding:     zapcore.DefaultLineEnding,
+			EncodeLevel:    zapcore.CapitalColorLevelEncoder,
+			EncodeTime:     zapcore.ISO8601TimeEncoder,
+			EncodeDuration: zapcore.StringDurationEncoder,
+			EncodeCaller:   zapcore.ShortCallerEncoder,
+		},
+		OutputPaths:      []string{"stdout"},
+		ErrorOutputPaths: []string{"stderr"},
+	}
+	logger, _ = cfg.Build()
+	return
 }

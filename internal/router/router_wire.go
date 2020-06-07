@@ -17,6 +17,7 @@ func newRouter(hub *hub.Hub, db *gorm.DB, repo repository.Repository, ss *servic
 		service.ProviderSet,
 		newGin,
 		wire.Struct(new(v1.Handlers), "*"),
+		wire.Struct(new(Router), "*"),
 	)
 	return nil
 }

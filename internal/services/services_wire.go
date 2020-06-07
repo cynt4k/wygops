@@ -9,4 +9,5 @@ import (
 // ProviderSet : Services dependency injection
 var ProviderSet = wire.NewSet(wire.FieldsOf(new(*Services),
 	"User",
+	"Ldap",
 ))
