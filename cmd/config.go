@@ -50,8 +50,16 @@ type Config struct {
 	Provider ConfigProvider `yaml:"provider"`
 }
 
+var (
+	config = Config{}
+)
+
+// GetConfig : Return the viper config
+func GetConfig() *Config {
+	return &config
+}
+
 func readDefaultConfig(configDir string) error {
-	config := Config{}
 	yamlFile, err := ioutil.ReadFile(filepath.Join(configDir, "default.yaml"))
 
 	if err != nil {
