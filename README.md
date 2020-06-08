@@ -1,5 +1,7 @@
 # wyGOps
 
+<strong>NOTE: THIS CODEBASE IS HEAVILY IN PROGRESS</strong>
+
 Manage your wireguard users based on different authentification provider.
 
 ## Description
