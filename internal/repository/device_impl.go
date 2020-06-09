@@ -4,7 +4,9 @@ import (
 	"github.com/cynt4k/wygops/internal/event"
 	"github.com/cynt4k/wygops/internal/models"
 	"github.com/cynt4k/wygops/pkg/util/gormutil"
+	"github.com/cynt4k/wygops/pkg/util/structs"
 	"github.com/jinzhu/gorm"
+	"github.com/leandro-lugaresi/hub"
 )
 
 // CreateDevice : Create an device
@@ -26,9 +28,14 @@ func (repo *GormRepository) CreateDevice(device *models.Device) (*models.Device,
 		return nil, err
 	}
 
-	repo.bus.Publish(event.DeviceCreated, event.DeviceCreatedEvent{
+	msg, _ := structs.StructToMap(event.DeviceCreatedEvent{
 		DeviceID: device.ID,
 		UserID:   device.UserID,
+	})
+
+	repo.hub.Publish(hub.Message{
+		Name:   event.DeviceCreated,
+		Fields: msg,
 	})
 
 	return device, nil
@@ -66,9 +73,14 @@ func (repo *GormRepository) DeleteDevice(deviceID uint) error {
 		return err
 	}
 
-	repo.bus.Publish(event.DeviceDeleted, event.DeviceDeletedEvent{
+	msg, _ := structs.StructToMap(event.DeviceDeletedEvent{
 		DeviceID: deviceID,
 		UserID:   device.UserID,
+	})
+
+	repo.hub.Publish(hub.Message{
+		Name:   event.DeviceDeleted,
+		Fields: msg,
 	})
 
 	return nil

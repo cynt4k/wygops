@@ -6,7 +6,9 @@ import (
 	"github.com/cynt4k/wygops/internal/event"
 	"github.com/cynt4k/wygops/internal/models"
 	"github.com/cynt4k/wygops/pkg/util/gormutil"
+	"github.com/cynt4k/wygops/pkg/util/structs"
 	"github.com/jinzhu/gorm"
+	"github.com/leandro-lugaresi/hub"
 )
 
 // CreateGroup : Create an group
@@ -29,9 +31,14 @@ func (repo *GormRepository) CreateGroup(group *models.Group) (*models.Group, err
 		return nil, err
 	}
 
-	repo.bus.Publish(event.GroupCreated, event.GroupCreatedEvent{
+	msg, _ := structs.StructToMap(event.GroupCreatedEvent{
 		GroupID: group.ID,
 		Name:    group.Name,
+	})
+
+	repo.hub.Publish(hub.Message{
+		Name:   event.GroupCreated,
+		Fields: msg,
 	})
 
 	return group, nil
@@ -67,9 +74,13 @@ func (repo *GormRepository) AddUserToGroup(userID uint, groupID uint) error {
 	}
 
 	if added {
-		repo.bus.Publish(event.UserAddedToGroup, event.UserAddedToGroupEvent{
+		msg, _ := structs.StructToMap(event.UserAddedToGroupEvent{
 			UserID:  userID,
 			GroupID: groupID,
+		})
+		repo.hub.Publish(hub.Message{
+			Name:   event.UserAddedToGroup,
+			Fields: msg,
 		})
 	}
 	return nil
@@ -111,8 +122,12 @@ func (repo *GormRepository) DeleteGroup(groupID uint) error {
 	if err != nil {
 		return err
 	}
-	repo.bus.Publish(event.GroupDeleted, event.GroupDeletedEvent{
+	msg, _ := structs.StructToMap(event.GroupDeletedEvent{
 		GroupID: groupID,
+	})
+	repo.hub.Publish(hub.Message{
+		Name:   event.GroupDeleted,
+		Fields: msg,
 	})
 	return nil
 }

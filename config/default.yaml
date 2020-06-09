@@ -1,3 +1,4 @@
+dev: false
 general:
   user:
     maxDevices: 3
@@ -15,3 +16,6 @@ provider:
     bindPassword: wygops
     baseDn: cn=Users,dc=wygops,dc=local
     groupFilter: "&(memberOf=cn=VPN-User,dc=wygops,dc=local)(object=person)"
+api:
+  host: "0.0.0.0"
+  port: 3000

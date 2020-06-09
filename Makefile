@@ -13,7 +13,7 @@ MODULE = $(shell env GO111MODULE=on $(GO) list -m)
 GOBASE := $(shell pwd)
 GOPATH := $(GOBASE)/vendor:$(GOBASE)
 GOBIN := $(GOBASE)/bin
-GOFILES := $(wildcard *.go)
+GOFILES := $(filter-out tools.go, $(wildcard *.go))
 
 # Use linker flags to provide version/build settings
 LDFLAGS=-ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD)"
@@ -28,6 +28,7 @@ PID := /tmp/.$(PROJECTNAME).pid
 MAKEFLAGS += --silent
 
 export GO111MODULE=on
+undefine GOPATH
 
 help: ##Display this help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
@@ -37,7 +38,7 @@ clean: .go-clean ##Cleanup the project files
 build: .go-get .go-build ##Build the project
 
 .go-build:
-	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) go build $(LDFLAGS) -o $(GOBIN)/$(PROJECTNAME) $(GOFILES)
+	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) CGO_ENABLED=0 go build $(LDFLAGS) -o $(GOBIN)/$(PROJECTNAME) $(GOFILES)
 
 .go-generate:
 	@GOPATH=$(GOPATH) GOBIN=$(GOBIN) go generate $(generate)
