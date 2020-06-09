@@ -3,6 +3,7 @@
 package cmd
 
 import (
+	"github.com/cynt4k/wygops/cmd/config"
 	"github.com/cynt4k/wygops/internal/repository"
 	"github.com/cynt4k/wygops/internal/router"
 	service "github.com/cynt4k/wygops/internal/services"
@@ -14,7 +15,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func newHttpServer(hub *hub.Hub, db *gorm.DB, repo repository.Repository, logger *zap.Logger) (*HTTPServer, error) {
+func newHttpServer(hub *hub.Hub, db *gorm.DB, repo repository.Repository, logger *zap.Logger, config *config.ProviderLdap) (*HTTPServer, error) {
 	wire.Build(
 		router.Init,
 		ldap.NewService,

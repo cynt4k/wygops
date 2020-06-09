@@ -6,6 +6,7 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gin-contrib/zap v0.0.1
 	github.com/gin-gonic/gin v1.6.3
+	github.com/go-ldap/ldap/v3 v3.1.10
 	github.com/go-ozzo/ozzo-validation/v4 v4.2.1
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/google/wire v0.4.0

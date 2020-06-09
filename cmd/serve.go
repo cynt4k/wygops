@@ -54,7 +54,7 @@ func ServeServer() error {
 		logger.Info("repository was not synced")
 	}
 
-	server, err := newHttpServer(hub, db, repo, logger)
+	server, err := newHttpServer(hub, db, repo, logger, &c.Provider.Ldap)
 
 	if err != nil {
 		logger.Fatal("error while creating server", zap.Error(err))

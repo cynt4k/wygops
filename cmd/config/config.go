@@ -17,18 +17,18 @@ var (
 	c          *Config
 )
 
-// ConfigGeneralUser : Config struct for user settings
-type ConfigGeneralUser struct {
+// GeneralUser : Config struct for user settings
+type GeneralUser struct {
 	MaxDevices int8 `yaml:"maxDevices"`
 }
 
-// ConfigGeneral : Config struct for general settings
-type ConfigGeneral struct {
-	User ConfigGeneralUser `yaml:"user"`
+// General : Config struct for general settings
+type General struct {
+	User GeneralUser `yaml:"user"`
 }
 
-// ConfigDatabase : Config struct for the database
-type ConfigDatabase struct {
+// Database : Config struct for the database
+type Database struct {
 	Host     string `yaml:"host"`
 	Port     int16  `yaml:"port"`
 	Username string `yaml:"username"`
@@ -36,34 +36,41 @@ type ConfigDatabase struct {
 	Database string `yaml:"database"`
 }
 
-// ConfigProviderLdap : Config struct for the LDAP provider
-type ConfigProviderLdap struct {
-	Enabled      bool   `yaml:"enabled"`
-	URI          string `yaml:"uri"`
-	BindDn       string `yaml:"bindDn"`
-	BindPassword string `yaml:"bindPassword"`
-	BaseDn       string `yaml:"baseDn"`
-	GroupFilter  string `yaml:"groupFilter"`
+// ProviderLdap : Config struct for the LDAP provider
+type ProviderLdap struct {
+	Enabled      bool     `yaml:"enabled"`
+	Type         string   `yaml:"type"`
+	Host         string   `yaml:"host"`
+	Port         int16    `yaml:"port"`
+	BindDn       string   `yaml:"bindDn"`
+	BindPassword string   `yaml:"bindPassword"`
+	BaseDn       string   `yaml:"baseDn"`
+	GroupFilter  string   `yaml:"groupFilter"`
+	UserFilter   string   `yaml:"userFilter"`
+	UserAttr     []string `yaml:"userAttr"`
+	GroupAttr    []string `yaml:"groupAttr"`
+	UserRDN      string   `yaml:"userRdn"`
+	GroupRDN     string   `yaml:"groupRdn"`
 }
 
-// ConfigProvider : Config struct for the Providers
-type ConfigProvider struct {
-	Ldap ConfigProviderLdap `yaml:"ldap"`
+// Provider : Config struct for the Providers
+type Provider struct {
+	Ldap ProviderLdap `yaml:"ldap"`
 }
 
-// ConfigAPI : Config struct for the api
-type ConfigAPI struct {
+// API : Config struct for the api
+type API struct {
 	Host string `yaml:"host"`
 	Port int16  `yaml:"port"`
 }
 
 // Config type for the config file to be handeld
 type Config struct {
-	DevMode  bool           `yaml:"dev"`
-	General  ConfigGeneral  `yaml:"general"`
-	Database ConfigDatabase `yaml:"database"`
-	Provider ConfigProvider `yaml:"provider"`
-	API      ConfigAPI      `yaml:"api"`
+	DevMode  bool     `yaml:"dev"`
+	General  General  `yaml:"general"`
+	Database Database `yaml:"database"`
+	Provider Provider `yaml:"provider"`
+	API      API      `yaml:"api"`
 }
 
 var (

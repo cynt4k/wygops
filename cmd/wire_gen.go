@@ -6,6 +6,7 @@
 package cmd
 
 import (
+	"github.com/cynt4k/wygops/cmd/config"
 	"github.com/cynt4k/wygops/internal/repository"
 	"github.com/cynt4k/wygops/internal/router"
 	"github.com/cynt4k/wygops/internal/services"
@@ -22,9 +23,9 @@ import (
 
 // Injectors from serve_wire.go:
 
-func newHttpServer(hub2 *hub.Hub, db *gorm.DB, repo repository.Repository, logger *zap.Logger) (*HTTPServer, error) {
+func newHttpServer(hub2 *hub.Hub, db *gorm.DB, repo repository.Repository, logger *zap.Logger, config2 *config.ProviderLdap) (*HTTPServer, error) {
 	userService := user.NewService(repo, hub2, logger)
-	ldapLDAP, err := ldap.NewService(repo)
+	ldapLDAP, err := ldap.NewService(repo, config2)
 	if err != nil {
 		return nil, err
 	}
