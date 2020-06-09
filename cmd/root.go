@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/cynt4k/wygops/cmd/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -23,7 +24,7 @@ var (
 		SilenceUsage: true,
 		Run:          func(c *cobra.Command, args []string) {},
 	}
-	c *Config
+	c = config.GetConfig()
 )
 
 // Execute : Run the cmd parser
@@ -53,7 +54,7 @@ func initConfig() {
 		_configDir := filepath.Join(fileDir, "config")
 		viper.AddConfigPath(_configDir)
 
-		readDefaultConfig(_configDir)
+		readDefaultConfig(_configDir, c)
 
 		switch env := strings.ToLower(os.Getenv("ENV")); env {
 		case "dev":

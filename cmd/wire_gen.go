@@ -16,6 +16,10 @@ import (
 	"go.uber.org/zap"
 )
 
+import (
+	_ "github.com/go-sql-driver/mysql"
+)
+
 // Injectors from serve_wire.go:
 
 func newHttpServer(hub2 *hub.Hub, db *gorm.DB, repo repository.Repository, logger *zap.Logger) (*HTTPServer, error) {

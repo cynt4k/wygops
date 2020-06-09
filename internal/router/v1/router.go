@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"net/http"
+
 	"github.com/cynt4k/wygops/internal/repository"
 	"github.com/cynt4k/wygops/internal/services/ldap"
 	"github.com/gin-gonic/gin"
@@ -22,11 +24,8 @@ type Config struct {
 	Revision string
 }
 
-// func (h *Handlers) Init(group *gin.RouterGroup) error {
-
-// }
-
+// Init : Initialize the v1 Routes
 func (h *Handlers) Init(g *gin.RouterGroup) {
 	api := g.Group("/v1")
-	api.Use()
+	api.GET("/", func(c *gin.Context) { c.String(http.StatusOK, http.StatusText(http.StatusOK)) })
 }

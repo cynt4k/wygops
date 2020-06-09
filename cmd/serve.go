@@ -26,7 +26,7 @@ func ServeServer() error {
 	logger := getLogger()
 
 	logger.Info("connecting to database...")
-	db, err := c.getDatabase()
+	db, err := getDatabase(&c.Database, c.DevMode)
 
 	if err != nil {
 		logger.Fatal("error while connecting to the database", zap.Error(err))

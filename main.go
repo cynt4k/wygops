@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"github.com/cynt4k/wygops/cmd"
+	"github.com/cynt4k/wygops/cmd/config"
 	"github.com/spf13/viper"
 )
 
@@ -31,7 +32,7 @@ func main() {
 	shutdownCtx, shutdown := context.WithCancel(context.Background())
 	defer shutdown()
 
-	config := cmd.Config{}
+	config := config.Config{}
 	err = viper.Unmarshal(&config)
 	if err != nil {
 		log.Fatal(err)
