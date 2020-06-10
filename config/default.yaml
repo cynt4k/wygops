@@ -18,7 +18,7 @@ provider:
     bindPassword: "wygops"
     baseDn: "dc=wygops,dc=internal"
     userFilter: "(&(objectClass=inetOrgPerson))"
-    groupFilter: "|(objectClass=groupOfNames)(objectClass=groupOfUniqueNames)"
+    groupFilter: "(|(objectClass=groupOfNames)(objectClass=groupOfUniqueNames))"
     userRdn: "cn"
     userAttr:
       - "cn"

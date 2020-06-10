@@ -30,14 +30,15 @@ func (h *Handlers) Init(g *gin.RouterGroup) {
 	api.GET("/", func(c *gin.Context) { c.String(http.StatusOK, http.StatusText(http.StatusOK)) })
 	api.GET("/test", func(c *gin.Context) {
 		c.String(http.StatusOK, http.StatusText(http.StatusOK))
-		// // user, err := h.LDAP.GetUser("developer", true)
-		// // if err != nil {
-		// // 	c.JSON(http.StatusNoContent, gin.H{
-		// // 		"message": "no content",
-		// // 	})
-		// // }
+		// user, err := h.LDAP.FindUser("developer", true)
+		// if err != nil {
+		// 	c.JSON(http.StatusNoContent, gin.H{
+		// 		"message": "no content",
+		// 	})
+		// }
+		// c.JSON(http.StatusOK, user)
 
-		// group, err := h.LDAP.GetGroup("Maintaners", false)
+		// group, err := h.LDAP.GetGroupAndUsers("Validators", true)
 
 		// if err != nil {
 		// 	c.JSON(http.StatusNoContent, gin.H{
@@ -45,7 +46,5 @@ func (h *Handlers) Init(g *gin.RouterGroup) {
 		// 	})
 		// }
 		// c.JSON(http.StatusOK, group)
-
-		// // c.JSON(http.StatusOK, user)
 	})
 }
