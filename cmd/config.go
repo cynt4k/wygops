@@ -10,6 +10,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"github.com/spf13/viper"
+	"github.com/wantedly/gorm-zap"
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 )
 
@@ -35,7 +37,7 @@ func readDefaultConfig(configDir string, configFile *config.Config) error {
 	return nil
 }
 
-func getDatabase(databaseConfig *config.Database, mode bool) (*gorm.DB, error) {
+func getDatabase(databaseConfig *config.Database, mode bool, logger *zap.Logger) (*gorm.DB, error) {
 	engine, err := gorm.Open("mysql", fmt.Sprintf(
 		"%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=true",
 		databaseConfig.Username,
@@ -50,5 +52,6 @@ func getDatabase(databaseConfig *config.Database, mode bool) (*gorm.DB, error) {
 
 	engine.BlockGlobalUpdate(true)
 	engine.LogMode(mode)
+	engine.SetLogger(gormzap.New(logger))
 	return engine.Set("gorm:table_options", "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"), nil
 }
