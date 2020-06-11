@@ -17,10 +17,10 @@ type Service struct {
 }
 
 // NewService : Create an new LDAP Service
-func NewService(repo repository.Repository, config *config.ProviderLdap) (LDAP, error) {
+func NewService(repo repository.Repository, config *config.Config) (LDAP, error) {
 	ldap := &Service{
 		repo:   repo,
-		config: config,
+		config: &config.Provider.Ldap,
 	}
 	return ldap, ldap.connect()
 }

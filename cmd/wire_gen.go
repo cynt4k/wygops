@@ -12,6 +12,7 @@ import (
 	"github.com/cynt4k/wygops/internal/services"
 	"github.com/cynt4k/wygops/internal/services/ldap"
 	"github.com/cynt4k/wygops/internal/services/user"
+	"github.com/cynt4k/wygops/internal/services/wireguard"
 	"github.com/jinzhu/gorm"
 	"github.com/leandro-lugaresi/hub"
 	"go.uber.org/zap"
@@ -23,15 +24,20 @@ import (
 
 // Injectors from serve_wire.go:
 
-func newHttpServer(hub2 *hub.Hub, db *gorm.DB, repo repository.Repository, logger *zap.Logger, config2 *config.ProviderLdap) (*HTTPServer, error) {
+func newHttpServer(hub2 *hub.Hub, db *gorm.DB, repo repository.Repository, logger *zap.Logger, config2 *config.Config) (*HTTPServer, error) {
 	userService := user.NewService(repo, hub2, logger)
 	ldapLDAP, err := ldap.NewService(repo, config2)
 	if err != nil {
 		return nil, err
 	}
+	wireguardWireguard, err := wireguard.NewService(repo, logger, config2)
+	if err != nil {
+		return nil, err
+	}
 	services := &service.Services{
-		User: userService,
-		Ldap: ldapLDAP,
+		User:      userService,
+		Ldap:      ldapLDAP,
+		Wireguard: wireguardWireguard,
 	}
 	engine := router.Init(hub2, db, repo, services, logger)
 	httpServer := &HTTPServer{

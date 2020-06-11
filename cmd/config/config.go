@@ -14,9 +14,18 @@ type GeneralUser struct {
 	MaxDevices int8 `yaml:"maxDevices"`
 }
 
+// GeneralSubnet : Config struct for the subnet
+type GeneralSubnet struct {
+	V4        string `yaml:"v4"`
+	V6        string `yaml:"v6"`
+	GatewayV4 string `yaml:"gatewayV4"`
+	GatewayV6 string `yaml:"gatewayV6"`
+}
+
 // General : Config struct for general settings
 type General struct {
-	User GeneralUser `yaml:"user"`
+	User   GeneralUser   `yaml:"user"`
+	Subnet GeneralSubnet `yaml:"subnet"`
 }
 
 // Database : Config struct for the database
@@ -56,13 +65,19 @@ type API struct {
 	Port int16  `yaml:"port"`
 }
 
+// Wireguard : Config struct for wireguard
+type Wireguard struct {
+	Interface string `yaml:"interface"`
+}
+
 // Config type for the config file to be handeld
 type Config struct {
-	DevMode  bool     `yaml:"dev"`
-	General  General  `yaml:"general"`
-	Database Database `yaml:"database"`
-	Provider Provider `yaml:"provider"`
-	API      API      `yaml:"api"`
+	DevMode   bool      `yaml:"dev"`
+	General   General   `yaml:"general"`
+	Wireguard Wireguard `yaml:"wireguard"`
+	Database  Database  `yaml:"database"`
+	Provider  Provider  `yaml:"provider"`
+	API       API       `yaml:"api"`
 }
 
 var (

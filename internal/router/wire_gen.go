@@ -19,11 +19,13 @@ import (
 func newRouter(hub2 *hub.Hub, db *gorm.DB, repo repository.Repository, ss *service.Services, logger *zap.Logger) *Router {
 	engine := newGin(logger, repo)
 	ldap := ss.Ldap
+	wireguard := ss.Wireguard
 	handlers := &v1.Handlers{
-		Repo:   repo,
-		Bus:    hub2,
-		Logger: logger,
-		LDAP:   ldap,
+		Repo:      repo,
+		Bus:       hub2,
+		Logger:    logger,
+		LDAP:      ldap,
+		Wireguard: wireguard,
 	}
 	router := &Router{
 		app: engine,
