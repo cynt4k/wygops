@@ -5,17 +5,20 @@ type User struct {
 	Username  string
 	FirstName string
 	LastName  string
-	Groups    []Group
+	Mail      string
+	Groups    []string
 }
 
 // Group : LDAP group struct
 type Group struct {
 	Name    string
-	Members []User
+	Members []*User
 }
 
 // LDAP : LDAP interface to be implemented
 type LDAP interface {
-	GetUser(username string) (User, error)
-	GetGroup(name string) (Group, error)
+	GetUser(username string, recursiveGroup bool) (*User, error)
+	FindUser(name string, recursiveGroup bool) (*User, error)
+	GetGroup(name string, recursive bool) (*Group, error)
+	GetGroupAndUsers(name string, recursive bool) (*Group, error)
 }

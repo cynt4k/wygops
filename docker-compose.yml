@@ -18,3 +18,23 @@ services:
       - 8080:80
     links:
       - mysql:db
+  ldap:
+    image: cynt4k/wygops-ldap:latest
+    build:
+      context: scripts/docker
+      dockerfile: ldap.Dockerfile
+    environment: 
+      - LDAP_ADMIN_PASSWORD=wygops
+      - LDAP_BASE_DN=dc=wygops,dc=internal
+    ports:
+      - 389:389
+  ldapadmin:
+    image: osixia/phpldapadmin:stable
+    ports:
+      - 8081:80
+    environment: 
+      - PHPLDAPADMIN_LDAP_HOSTS=ldap
+      - PHPLDAPADMIN_HTTPS=false
+    links: 
+      - ldap
+    

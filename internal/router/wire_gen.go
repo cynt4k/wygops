@@ -18,12 +18,12 @@ import (
 
 func newRouter(hub2 *hub.Hub, db *gorm.DB, repo repository.Repository, ss *service.Services, logger *zap.Logger) *Router {
 	engine := newGin(logger, repo)
-	ldap := &ss.Ldap
+	ldap := ss.Ldap
 	handlers := &v1.Handlers{
 		Repo:   repo,
 		Bus:    hub2,
 		Logger: logger,
-		User:   ldap,
+		LDAP:   ldap,
 	}
 	router := &Router{
 		app: engine,

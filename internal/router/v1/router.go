@@ -15,7 +15,7 @@ type Handlers struct {
 	Repo   repository.Repository
 	Bus    *hub.Hub
 	Logger *zap.Logger
-	User   *ldap.LDAP
+	LDAP   ldap.LDAP
 }
 
 // Config : Config struct
@@ -28,4 +28,23 @@ type Config struct {
 func (h *Handlers) Init(g *gin.RouterGroup) {
 	api := g.Group("/v1")
 	api.GET("/", func(c *gin.Context) { c.String(http.StatusOK, http.StatusText(http.StatusOK)) })
+	api.GET("/test", func(c *gin.Context) {
+		c.String(http.StatusOK, http.StatusText(http.StatusOK))
+		// user, err := h.LDAP.FindUser("developer", true)
+		// if err != nil {
+		// 	c.JSON(http.StatusNoContent, gin.H{
+		// 		"message": "no content",
+		// 	})
+		// }
+		// c.JSON(http.StatusOK, user)
+
+		// group, err := h.LDAP.GetGroupAndUsers("Validators", true)
+
+		// if err != nil {
+		// 	c.JSON(http.StatusNoContent, gin.H{
+		// 		"message": "no content",
+		// 	})
+		// }
+		// c.JSON(http.StatusOK, group)
+	})
 }
