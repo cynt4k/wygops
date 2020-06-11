@@ -3,6 +3,7 @@ module github.com/cynt4k/wygops
 go 1.14
 
 require (
+	github.com/dspinhirne/netaddr-go v0.0.0-20200114144454-1f4c8303963f
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gin-contrib/zap v0.0.1
 	github.com/gin-gonic/gin v1.6.3
@@ -18,7 +19,8 @@ require (
 	github.com/spf13/viper v1.7.0
 	github.com/wantedly/gorm-zap v0.0.0-20171015071652-372d3517a876
 	go.uber.org/zap v1.10.0
-	golang.org/x/crypto v0.0.0-20191205180655-e7c4368fe9dd
+	golang.org/x/crypto v0.0.0-20200204104054-c9f3fb736b72
+	golang.zx2c4.com/wireguard/wgctrl v0.0.0-20200609130330-bd2cb7843e1b
 	gopkg.in/gormigrate.v1 v1.6.0
 	gopkg.in/yaml.v2 v2.2.8
 )

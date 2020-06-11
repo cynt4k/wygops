@@ -1,7 +1,13 @@
 dev: false
 general:
+  subnet:
+    v4: "172.20.0.0/16"
+    v6: "fc00:cafe:c0d3::"
   user:
     maxDevices: 3
+wireguard:
+  privateKey: "MIM2pvpHqs0YYlXOrW9wKx/xyK2doN/fsptofEl9Y0g="
+  publicKey: "pbTGR/v5EYUnXawHNRWyKg5vYMWe98WhU1DpQmmMXQw="
 database:
   host: localhost
   port: 3306

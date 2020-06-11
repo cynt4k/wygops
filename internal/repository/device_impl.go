@@ -41,6 +41,16 @@ func (repo *GormRepository) CreateDevice(device *models.Device) (*models.Device,
 	return device, nil
 }
 
+// GetDevices : Get all devices
+func (repo *GormRepository) GetDevices() ([]models.Device, error) {
+	var devices []models.Device
+
+	if err := repo.db.Find(&devices).Error; err != nil {
+		return nil, err
+	}
+	return devices, nil
+}
+
 // GetDevicesByUserID : Get all devices of the user
 func (repo *GormRepository) GetDevicesByUserID(userID uint) ([]models.Device, error) {
 	user := models.User{
