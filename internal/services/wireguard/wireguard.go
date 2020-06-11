@@ -1,16 +1,20 @@
 package wireguard
 
-// Device : Wireguard Device
-type Device struct {
-	PrivateKey  string
-	PublicKey   string
-	IPV4Address string
-	IPV6Address string
+import (
+	"net"
+
+	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
+)
+
+// Peer : Wireguard Peer
+type Peer struct {
+	PrivateKey  wgtypes.Key
+	PublicKey   wgtypes.Key
+	IPV4Address net.IP
+	IPV6Address net.IP
 }
 
 // Wireguard : Wireguard service interface
 type Wireguard interface {
-	CreateDevice(name string) (*Device, error)
-	DeleteDevice(device *Device) error
-	UpdateDevice(device *Device) (*Device, error)
+	CreatePeer() (*Peer, error)
 }

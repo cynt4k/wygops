@@ -21,7 +21,7 @@ type User struct {
 	LastName  string    `gorm:"size 100;not null" json:"lastName"`
 	Mail      string    `gorm:"size 100;not null" json:"mail"`
 	Type      string    `gorm:"size 50;not null" json:"type"`
-	Devices   []Device  `gorm:"foreignkey:userId" json:"devices"`
+	Devices   []*Device `gorm:"foreignkey:userId" json:"devices"`
 	CreatedAt time.Time `gorm:"precision:6" json:"createdAt"`
 	UpdatedAt time.Time `gorm:"precision:6" json:"updatedAt"`
 }

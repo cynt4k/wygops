@@ -16,8 +16,10 @@ type GeneralUser struct {
 
 // GeneralSubnet : Config struct for the subnet
 type GeneralSubnet struct {
-	V4 string `yaml:"v4"`
-	V6 string `yaml:"v6"`
+	V4        string `yaml:"v4"`
+	V6        string `yaml:"v6"`
+	GatewayV4 string `yaml:"gatewayV4"`
+	GatewayV6 string `yaml:"gatewayV6"`
 }
 
 // General : Config struct for general settings
@@ -65,8 +67,7 @@ type API struct {
 
 // Wireguard : Config struct for wireguard
 type Wireguard struct {
-	PrivateKey string `yaml:"privateKey"`
-	PublicKey  string `yaml:"publicKey"`
+	Interface string `yaml:"interface"`
 }
 
 // Config type for the config file to be handeld

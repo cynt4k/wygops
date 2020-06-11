@@ -5,6 +5,7 @@ import (
 
 	"github.com/cynt4k/wygops/internal/repository"
 	"github.com/cynt4k/wygops/internal/services/ldap"
+	"github.com/cynt4k/wygops/internal/services/wireguard"
 	"github.com/gin-gonic/gin"
 	"github.com/leandro-lugaresi/hub"
 	"go.uber.org/zap"
@@ -12,10 +13,11 @@ import (
 
 // Handlers : Handler struct
 type Handlers struct {
-	Repo   repository.Repository
-	Bus    *hub.Hub
-	Logger *zap.Logger
-	LDAP   ldap.LDAP
+	Repo      repository.Repository
+	Bus       *hub.Hub
+	Logger    *zap.Logger
+	LDAP      ldap.LDAP
+	Wireguard wireguard.Wireguard
 }
 
 // Config : Config struct
