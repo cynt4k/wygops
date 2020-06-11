@@ -53,6 +53,15 @@ func (repo *GormRepository) GetUser(userID uint) (*models.User, error) {
 	return getUser(repo.db, false, &user)
 }
 
+// GetUserByUsername : Get the user by the username
+func (repo *GormRepository) GetUserByUsername(username string) (*models.User, error) {
+	user := models.User{
+		Username: username,
+	}
+
+	return getUser(repo.db, false, &user)
+}
+
 // GetUserWithDevices : Get the user with his devices
 func (repo *GormRepository) GetUserWithDevices(userID uint) (*models.User, error) {
 	user := models.User{
