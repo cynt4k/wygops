@@ -16,6 +16,7 @@ require (
 	github.com/prometheus/client_golang v0.9.3
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.7.0
+	github.com/wantedly/gorm-zap v0.0.0-20171015071652-372d3517a876
 	go.uber.org/zap v1.10.0
 	golang.org/x/crypto v0.0.0-20191205180655-e7c4368fe9dd
 	gopkg.in/gormigrate.v1 v1.6.0
