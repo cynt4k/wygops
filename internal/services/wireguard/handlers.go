@@ -28,11 +28,11 @@ func deviceCreatedHandler(w *Service, ev hub.Message) {
 	device, err := w.repo.GetDevice(msg.DeviceID)
 
 	if err != nil {
-		w.logger.Warn(fmt.Sprintf("Device not found with it %v", msg.DeviceID))
+		w.logger.Warn(fmt.Sprintf("Device not found with id %v", msg.DeviceID))
 		return
 	}
 
-	publicKey, err := wgtypes.ParseKey(device.PrivateKey)
+	publicKey, err := wgtypes.ParseKey(device.PublicKey)
 
 	if err != nil {
 		w.logger.Warn(fmt.Sprintf("Public key for device %v invalid", msg.DeviceID))
@@ -45,4 +45,64 @@ func deviceCreatedHandler(w *Service, ev hub.Message) {
 		IPV6Address: net.ParseIP(device.IPv6Address),
 	}
 	w.addPeer(&peer)
+}
+
+func deviceDeletedHandler(w *Service, ev hub.Message) {
+	var msg event.DeviceDeletedEvent
+	err := mapstructure.Decode(ev.Fields, &msg)
+	if err != nil {
+		w.logger.Warn("error decode interface to struct")
+		return
+	}
+
+	device, err := w.repo.GetDevice(msg.DeviceID)
+
+	if err != nil {
+		w.logger.Warn(fmt.Sprintf("Device not found with id %v", msg.DeviceID))
+		return
+	}
+
+	publicKey, err := wgtypes.ParseKey(device.PublicKey)
+
+	if err != nil {
+		w.logger.Warn(fmt.Sprintf("Public key for device %v is invalid", msg.DeviceID))
+		return
+	}
+
+	peer := Peer{
+		PublicKey:   publicKey,
+		IPV4Address: net.ParseIP(device.IPv4Address),
+		IPV6Address: net.ParseIP(device.IPv6Address),
+	}
+	w.deletePeer(&peer)
+}
+
+func deviceUpdatedHandler(w *Service, ev hub.Message) {
+	var msg event.DeviceUpdatedEvent
+	err := mapstructure.Decode(ev.Fields, &msg)
+	if err != nil {
+		w.logger.Warn("error decode interface to struct")
+		return
+	}
+
+	device, err := w.repo.GetDevice(msg.DeviceID)
+
+	if err != nil {
+		w.logger.Warn(fmt.Sprintf("Device not found with id %v", msg.DeviceID))
+		return
+	}
+
+	publicKey, err := wgtypes.ParseKey(device.PublicKey)
+
+	if err != nil {
+		w.logger.Warn(fmt.Sprintf("Public key for device %v is invalid", msg.DeviceID))
+		return
+	}
+
+	peer := Peer{
+		PublicKey:   publicKey,
+		IPV4Address: net.ParseIP(device.IPv4Address),
+		IPV6Address: net.ParseIP(device.IPv6Address),
+	}
+	w.updatePeer(&peer)
 }

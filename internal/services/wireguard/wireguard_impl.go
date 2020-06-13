@@ -165,6 +165,24 @@ func (w *Service) updatePeer(device *Peer) error {
 	})
 }
 
+func (w *Service) deletePeer(device *Peer) error {
+	peer, err := w.parsePeer(device)
+
+	if err != nil {
+		return err
+	}
+
+	return w.client.ConfigureDevice(w.config.Interface, wgtypes.Config{
+		Peers: []wgtypes.PeerConfig{
+			wgtypes.PeerConfig{
+				PublicKey: peer.PublicKey,
+				Remove:    true,
+			},
+		},
+	})
+
+}
+
 // CreatePeer : Create a new wireguard device
 func (w *Service) CreatePeer() (*Peer, error) {
 	privateKey, err := wgtypes.GeneratePrivateKey()
