@@ -15,7 +15,7 @@ type Device struct {
 	PrivateKey  string    `gorm:"size:255;not null" json:"privateKey"`
 	PublicKey   string    `gorm:"size:255;not null" json:"publicKey"`
 	IPv4Address string    `gorm:"size:15;not null" json:"ipv4Address"`
-	IPv6Address string    `gorm:"size:29;not null" json:"ipv6Address"`
+	IPv6Address string    `gorm:"size:45;not null" json:"ipv6Address"`
 	CreatedAt   time.Time `gorm:"precision:6" json:"createdAt"`
 	UpdatedAt   time.Time `gorm:"precision:6" json:"updatedAt"`
 }

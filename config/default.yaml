@@ -1,8 +1,8 @@
 dev: false
 general:
   subnet:
-    v4: "192.168.9.0/16"
-    v6: "fc00:cafe:c0d3::"
+    v4: "192.168.9.0/24"
+    v6: "fc00:cafe:c0d3::/64"
     gatewayV4: "192.168.9.1"
     gatewayV6: "fc00:cafe:c0d3::1"
   user:

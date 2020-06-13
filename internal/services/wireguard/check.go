@@ -2,10 +2,13 @@ package wireguard
 
 import (
 	"fmt"
+	"math/rand"
 	"net"
+	"regexp"
 
 	"github.com/cynt4k/wygops/internal/models"
 	"github.com/dspinhirne/netaddr-go"
+	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 )
 
 func (w *Service) checkV4Subnet(ip string) error {
@@ -48,11 +51,11 @@ func (w *Service) checkV6Subnet(ip string) error {
 	return nil
 }
 
-func (w *Service) getIPV4Subnet() ([]*net.IP, error) {
-	inc := func(ip net.IP) {
-		for j := len(ip) - 1; j >= 0; j-- {
-			ip[j]++
-			if ip[j] > 0 {
+func (w *Service) getIPV4Subnet() ([]string, error) {
+	inc := func(ipInc net.IP) {
+		for j := len(ipInc) - 1; j >= 0; j-- {
+			ipInc[j]++
+			if ipInc[j] > 0 {
 				break
 			}
 		}
@@ -63,9 +66,9 @@ func (w *Service) getIPV4Subnet() ([]*net.IP, error) {
 		return nil, err
 	}
 
-	var ips []*net.IP
+	var ips []string
 	for ip := ip.Mask(ipnet.Mask); ipnet.Contains(ip); inc(ip) {
-		ips = append(ips, &ip)
+		ips = append(ips, ip.String())
 	}
 
 	lenIPs := len(ips)
@@ -83,51 +86,65 @@ func (w *Service) getAvailableIPV4(devices []*models.Device) (*net.IP, error) {
 	if err != nil {
 		return nil, err
 	}
+	var selectedIP *net.IP
 	for _, device := range devices {
 		ip := net.ParseIP(device.IPv4Address)
-		for _, availableIP := range allIps {
-			if ip.Equal(*availableIP) {
+		for i, availableIP := range allIps {
+			netIP := net.ParseIP(availableIP)
+			if ip.Equal(netIP) {
 				continue
 			}
-			return availableIP, nil
+			if netIP.Equal(net.ParseIP(w.subnet.GatewayV4)) {
+				continue
+			}
+
+			selectedIP = &netIP
+			allIps = allIps[i:]
+			break
 		}
 	}
-	return nil, ErrNoIPAvailable
+
+	if selectedIP == nil {
+		return nil, ErrNoIPAvailable
+	}
+	return selectedIP, nil
 }
 
 func (w *Service) getAvailableIPV6(devices []*models.Device) (*net.IP, error) {
 
 	genAddress := func(sn string, retries int) (net.IP, error) {
-		subnet, err := netaddr.ParseIPv6(sn)
+		re, _ := regexp.Compile("(^.*)\\/.*")
+
+		matches := re.FindStringSubmatch(sn)
+
+		if len(matches) != 2 {
+			return nil, ErrNoIPAvailable
+		}
+
+		subnet, err := netaddr.ParseIPv6(matches[1])
 
 		if err != nil {
 			return nil, err
 		}
 
-		mask, err := netaddr.NewMask128(128)
-
-		if err != nil {
-			return nil, err
-		}
-
-		var address netaddr.IPv6
+		var address *netaddr.IPv6
 		for i := 0; i < retries; i++ {
-			address, err := netaddr.NewIPv6Net(subnet, mask)
+			address = netaddr.NewIPv6(subnet.NetId(), rand.Uint64())
 
-			if err != nil {
-				return nil, err
-			}
+			w.logger.Info(address.String())
 
 			if address.String() == w.subnet.GatewayV6 {
 				err = ErrNoIPAvailable
 				continue
 			}
+			break
 		}
 
 		if err != nil {
 			return nil, err
 		}
 
+		w.logger.Info(address.String())
 		return net.ParseIP(address.String()), nil
 	}
 
@@ -163,4 +180,27 @@ func (w *Service) getAvailableIPV6(devices []*models.Device) (*net.IP, error) {
 		}
 	}
 	return nil, ErrNoIPAvailable
+}
+
+func (w *Service) parsePeer(device *Peer) (peer *wgtypes.PeerConfig, err error) {
+	if err := w.checkV4Subnet(device.IPV4Address.String()); err != nil {
+		return nil, err
+	}
+	if err := w.checkV6Subnet(device.IPV6Address.String()); err != nil {
+		return nil, err
+	}
+
+	_, networkV4, err := net.ParseCIDR(fmt.Sprintf("%s/32", device.IPV4Address.String()))
+	if err != nil {
+		return nil, err
+	}
+	_, networkV6, err := net.ParseCIDR(fmt.Sprintf("%s/128", device.IPV6Address.String()))
+	if err != nil {
+		return nil, err
+	}
+	peer = &wgtypes.PeerConfig{
+		PublicKey:  device.PublicKey,
+		AllowedIPs: []net.IPNet{*networkV4, *networkV6},
+	}
+	return
 }

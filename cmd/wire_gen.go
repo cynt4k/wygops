@@ -30,7 +30,7 @@ func newHttpServer(hub2 *hub.Hub, db *gorm.DB, repo repository.Repository, logge
 	if err != nil {
 		return nil, err
 	}
-	wireguardWireguard, err := wireguard.NewService(repo, logger, config2)
+	wireguardWireguard, err := wireguard.NewService(repo, hub2, logger, config2)
 	if err != nil {
 		return nil, err
 	}

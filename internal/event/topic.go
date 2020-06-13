@@ -22,6 +22,9 @@ const (
 	// DeviceCreated : Device was created
 	DeviceCreated = "device.created"
 
+	// DeviceUpdated : Device was created
+	DeviceUpdated = "device.updated"
+
 	// DeviceDeleted : Device was deleted
 	DeviceDeleted = "device.deleted"
 )
@@ -64,4 +67,9 @@ type DeviceCreatedEvent struct {
 type DeviceDeletedEvent struct {
 	DeviceID uint
 	UserID   uint
+}
+
+// DeviceUpdatedEvent : Event when device was updated
+type DeviceUpdatedEvent struct {
+	DeviceID uint
 }

@@ -6,6 +6,7 @@ import "github.com/cynt4k/wygops/internal/models"
 type DeviceRepository interface {
 	CreateDevice(*models.Device) (*models.Device, error)
 	// UpdateDevice(*models.Device) (*models.Device, error)
+	GetDevice(id uint) (*models.Device, error)
 	GetDevices() ([]*models.Device, error)
 	GetDevicesByUserID(uint) ([]*models.Device, error)
 	DeleteDevice(deviceID uint) error

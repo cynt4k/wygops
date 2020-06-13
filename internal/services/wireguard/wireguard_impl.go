@@ -6,6 +6,7 @@ import (
 
 	"github.com/cynt4k/wygops/cmd/config"
 	"github.com/cynt4k/wygops/internal/repository"
+	"github.com/leandro-lugaresi/hub"
 	"go.uber.org/zap"
 	"golang.zx2c4.com/wireguard/wgctrl"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
@@ -16,6 +17,7 @@ type Service struct {
 	client *wgctrl.Client
 	server *wgtypes.Device
 	repo   repository.Repository
+	hub    *hub.Hub
 	config *config.Wireguard
 	subnet *config.GeneralSubnet
 	logger *zap.Logger
@@ -27,7 +29,7 @@ var (
 )
 
 // NewService : Create a new wireguard service
-func NewService(repo repository.Repository, logger *zap.Logger, config *config.Config) (Wireguard, error) {
+func NewService(repo repository.Repository, hub *hub.Hub, logger *zap.Logger, config *config.Config) (Wireguard, error) {
 	if service != nil {
 		return service, nil
 	}
@@ -48,6 +50,7 @@ func NewService(repo repository.Repository, logger *zap.Logger, config *config.C
 		client: client,
 		server: device,
 		repo:   repo,
+		hub:    hub,
 		logger: logger,
 		config: &config.Wireguard,
 		subnet: &config.General.Subnet,
@@ -55,12 +58,28 @@ func NewService(repo repository.Repository, logger *zap.Logger, config *config.C
 	service = wg
 
 	err = service.init()
+	service.initEventhandler()
 
 	if err != nil {
 		return nil, err
 	}
 
 	return service, nil
+}
+
+func (w *Service) initEventhandler() {
+	go func() {
+		topics := make([]string, 0, len(handlerMap))
+		for k := range handlerMap {
+			topics = append(topics, k)
+		}
+		for msg := range w.hub.Subscribe(200, topics...).Receiver {
+			h, ok := handlerMap[msg.Topic()]
+			if ok {
+				go h(w, msg)
+			}
+		}
+	}()
 }
 
 func (w *Service) init() error {
@@ -94,36 +113,74 @@ func (w *Service) init() error {
 }
 
 func (w *Service) addPeer(device *Peer) error {
+	peer, err := w.parsePeer(device)
 
-	if err := w.checkV4Subnet(device.IPV4Address.String()); err != nil {
-		return err
-	}
-	if err := w.checkV6Subnet(device.IPV6Address.String()); err != nil {
-		return err
-	}
-
-	_, networkV4, err := net.ParseCIDR(fmt.Sprintf("%s/32", device.IPV4Address.String()))
-	if err != nil {
-		return err
-	}
-	_, networkV6, err := net.ParseCIDR(fmt.Sprintf("%s/128", device.IPV6Address.String()))
 	if err != nil {
 		return err
 	}
 
-	peer := &wgtypes.PeerConfig{
-		PublicKey:  device.PublicKey,
-		AllowedIPs: []net.IPNet{*networkV4, *networkV6},
-	}
-
-	err = w.client.ConfigureDevice(w.config.Interface, wgtypes.Config{
+	return w.client.ConfigureDevice(w.config.Interface, wgtypes.Config{
 		Peers: []wgtypes.PeerConfig{*peer},
 	})
+}
+
+func (w *Service) updatePeer(device *Peer) error {
+	_, err := w.parsePeer(device)
 
 	if err != nil {
 		return err
 	}
-	return nil
+
+	var selectedPeer *wgtypes.Peer
+	for _, peer := range w.server.Peers {
+		if peer.PublicKey.String() == device.PublicKey.String() {
+			selectedPeer = &peer
+		}
+	}
+
+	if selectedPeer == nil {
+		return w.addPeer(device)
+	}
+
+	var allPeers []wgtypes.PeerConfig
+	for _, peer := range w.server.Peers {
+		var config wgtypes.PeerConfig
+		if peer.PublicKey.String() == selectedPeer.PublicKey.String() {
+			config = wgtypes.PeerConfig{
+				PublicKey:  selectedPeer.PublicKey,
+				AllowedIPs: selectedPeer.AllowedIPs,
+			}
+		} else {
+			config = wgtypes.PeerConfig{
+				PublicKey:  peer.PublicKey,
+				AllowedIPs: peer.AllowedIPs,
+			}
+		}
+		allPeers = append(allPeers, config)
+	}
+
+	return w.client.ConfigureDevice(w.config.Interface, wgtypes.Config{
+		Peers:        allPeers,
+		ReplacePeers: true,
+	})
+}
+
+func (w *Service) deletePeer(device *Peer) error {
+	peer, err := w.parsePeer(device)
+
+	if err != nil {
+		return err
+	}
+
+	return w.client.ConfigureDevice(w.config.Interface, wgtypes.Config{
+		Peers: []wgtypes.PeerConfig{
+			wgtypes.PeerConfig{
+				PublicKey: peer.PublicKey,
+				Remove:    true,
+			},
+		},
+	})
+
 }
 
 // CreatePeer : Create a new wireguard device
@@ -134,7 +191,6 @@ func (w *Service) CreatePeer() (*Peer, error) {
 		return nil, err
 	}
 	publicKey := privateKey.PublicKey()
-
 	devices, err := w.repo.GetDevices()
 
 	if err != nil {
@@ -147,6 +203,10 @@ func (w *Service) CreatePeer() (*Peer, error) {
 	}
 
 	ipv6, err := w.getAvailableIPV6(devices)
+
+	if err != nil {
+		return nil, err
+	}
 
 	peer := Peer{
 		PrivateKey:  privateKey,

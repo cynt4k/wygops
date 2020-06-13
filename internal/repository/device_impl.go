@@ -41,6 +41,19 @@ func (repo *GormRepository) CreateDevice(device *models.Device) (*models.Device,
 	return device, nil
 }
 
+// GetDevice : Get a device by its id
+func (repo *GormRepository) GetDevice(id uint) (*models.Device, error) {
+	return repo.getDevice(repo.db, &models.Device{ID: id})
+}
+
+func (repo *GormRepository) getDevice(tx *gorm.DB, where interface{}) (*models.Device, error) {
+	var d models.Device
+	if err := tx.First(&d, where).Error; err != nil {
+		return nil, convertError(err)
+	}
+	return &d, nil
+}
+
 // GetDevices : Get all devices
 func (repo *GormRepository) GetDevices() ([]*models.Device, error) {
 	var devices []*models.Device
