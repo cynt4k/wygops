@@ -16,6 +16,11 @@ type Group struct {
 	UpdatedAt time.Time    `gorm:"precision:6" json:"updatedAt"`
 }
 
+// TableName : Get the database table name
+func (g *Group) TableName() string {
+	return "groups"
+}
+
 // Validate : Validate the group
 func (g *Group) Validate() error {
 	return vd.ValidateStruct(
