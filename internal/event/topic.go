@@ -65,8 +65,9 @@ type DeviceCreatedEvent struct {
 
 // DeviceDeletedEvent : Event when device was deleted
 type DeviceDeletedEvent struct {
-	DeviceID uint
-	UserID   uint
+	DeviceID  uint
+	UserID    uint
+	PublicKey string
 }
 
 // DeviceUpdatedEvent : Event when device was updated

@@ -55,14 +55,7 @@ func deviceDeletedHandler(w *Service, ev hub.Message) {
 		return
 	}
 
-	device, err := w.repo.GetDevice(msg.DeviceID)
-
-	if err != nil {
-		w.logger.Warn(fmt.Sprintf("Device not found with id %v", msg.DeviceID))
-		return
-	}
-
-	publicKey, err := wgtypes.ParseKey(device.PublicKey)
+	publicKey, err := wgtypes.ParseKey(msg.PublicKey)
 
 	if err != nil {
 		w.logger.Warn(fmt.Sprintf("Public key for device %v is invalid", msg.DeviceID))
@@ -70,9 +63,7 @@ func deviceDeletedHandler(w *Service, ev hub.Message) {
 	}
 
 	peer := Peer{
-		PublicKey:   publicKey,
-		IPV4Address: net.ParseIP(device.IPv4Address),
-		IPV6Address: net.ParseIP(device.IPv6Address),
+		PublicKey: publicKey,
 	}
 	w.deletePeer(&peer)
 }

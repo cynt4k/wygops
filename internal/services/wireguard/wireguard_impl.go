@@ -174,7 +174,7 @@ func (w *Service) deletePeer(device *Peer) error {
 
 	return w.client.ConfigureDevice(w.config.Interface, wgtypes.Config{
 		Peers: []wgtypes.PeerConfig{
-			wgtypes.PeerConfig{
+			{
 				PublicKey: peer.PublicKey,
 				Remove:    true,
 			},

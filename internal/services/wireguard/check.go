@@ -86,7 +86,28 @@ func (w *Service) getAvailableIPV4(devices []*models.Device) (*net.IP, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if len(allIps) == 0 {
+		return nil, ErrNoIPAvailable
+	}
+
 	var selectedIP *net.IP
+	if len(devices) == 0 {
+		for _, availableIP := range allIps {
+			netIP := net.ParseIP(availableIP)
+			if netIP.Equal(net.ParseIP(w.subnet.GatewayV4)) {
+				continue
+			}
+			selectedIP = &netIP
+			break
+		}
+
+		if selectedIP == nil {
+			return nil, ErrNoIPAvailable
+		}
+		return selectedIP, nil
+	}
+
 	for _, device := range devices {
 		ip := net.ParseIP(device.IPv4Address)
 		for i, availableIP := range allIps {
@@ -131,8 +152,6 @@ func (w *Service) getAvailableIPV6(devices []*models.Device) (*net.IP, error) {
 		for i := 0; i < retries; i++ {
 			address = netaddr.NewIPv6(subnet.NetId(), rand.Uint64())
 
-			w.logger.Info(address.String())
-
 			if address.String() == w.subnet.GatewayV6 {
 				err = ErrNoIPAvailable
 				continue
@@ -159,6 +178,10 @@ func (w *Service) getAvailableIPV6(devices []*models.Device) (*net.IP, error) {
 
 	if ipv6 == nil {
 		return nil, fmt.Errorf("could not generate an ipv6 address - possible to small subnet")
+	}
+
+	if len(devices) == 0 {
+		return &ipv6, nil
 	}
 
 	for _, device := range devices {
