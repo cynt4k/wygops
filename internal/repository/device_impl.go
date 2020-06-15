@@ -107,8 +107,9 @@ func (repo *GormRepository) DeleteDevice(deviceID uint) error {
 	}
 
 	msg, _ := structs.StructToMap(event.DeviceDeletedEvent{
-		DeviceID: deviceID,
-		UserID:   device.UserID,
+		DeviceID:  deviceID,
+		UserID:    device.UserID,
+		PublicKey: device.PublicKey,
 	})
 
 	repo.hub.Publish(hub.Message{
