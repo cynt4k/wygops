@@ -12,7 +12,7 @@ import (
 // CreateUser : Create an user
 func (repo *GormRepository) CreateUser(user *models.User) (*models.User, error) {
 	err := repo.db.Transaction(func(tx *gorm.DB) error {
-		if exist, err := gormutil.RecordExists(tx, &user); err != nil {
+		if exist, err := gormutil.RecordExists(tx, &models.User{Username: user.Username}); err != nil {
 			return err
 		} else if exist {
 			return ErrAlreadyExists
