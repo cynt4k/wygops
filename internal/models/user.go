@@ -13,17 +13,18 @@ import (
 
 // User : User model
 type User struct {
-	ID        uint      `gorm:"primary_key"`
-	Username  string    `gorm:"size:100;not null;unique" json:"username"`
-	Password  string    `gorm:"size:100;not null" json:"password"`
-	Cipher    string    `gorm:"size:255;not null" json:"cipher"`
-	FirstName string    `gorm:"size:100;not null" json:"firstName"`
-	LastName  string    `gorm:"size 100;not null" json:"lastName"`
-	Mail      string    `gorm:"size 100;not null" json:"mail"`
-	Type      string    `gorm:"size 50;not null" json:"type"`
-	Devices   []*Device `gorm:"foreignkey:userId" json:"devices"`
-	CreatedAt time.Time `gorm:"precision:6" json:"createdAt"`
-	UpdatedAt time.Time `gorm:"precision:6" json:"updatedAt"`
+	ID              uint      `gorm:"primary_key"`
+	Username        string    `gorm:"size:100;not null;unique" json:"username"`
+	Password        string    `gorm:"size:100;not null" json:"password"`
+	ProtectPassword string    `gorm:"size:100" json:"protectPassword"`
+	Cipher          string    `gorm:"size:125;not null" json:"cipher"`
+	FirstName       string    `gorm:"size:100;not null" json:"firstName"`
+	LastName        string    `gorm:"size 100;not null" json:"lastName"`
+	Mail            string    `gorm:"size 100;not null" json:"mail"`
+	Type            string    `gorm:"size 50;not null" json:"type"`
+	Devices         []*Device `gorm:"foreignkey:userId" json:"devices"`
+	CreatedAt       time.Time `gorm:"precision:6" json:"createdAt"`
+	UpdatedAt       time.Time `gorm:"precision:6" json:"updatedAt"`
 }
 
 // TableName : Get the table name
@@ -53,19 +54,32 @@ func DecryptCipher(cipherText string, password string) (string, error) {
 
 // BeforeSave : Hook before saving the user
 func (u *User) BeforeSave() error {
-	hashedPassword, err := Hash(u.Password)
-	if u.Cipher == "" {
-		u.Cipher = randutil.RandStringRunes(64)
-	}
-	cipher, err := EncryptCipher(u.Cipher, u.Password)
-
-	if err != nil {
-		return err
-	}
 	if u.Type != "ldap" {
+		hashedPassword, err := Hash(u.Password)
+		if err != nil {
+			return err
+		}
 		u.Password = string(hashedPassword)
 	}
-	u.Cipher = cipher
+
+	if u.ProtectPassword != "" {
+		hashedProtectedPassword, err := Hash(u.ProtectPassword)
+		if err != nil {
+			return err
+		}
+		u.ProtectPassword = string(hashedProtectedPassword)
+		if u.Cipher == "" {
+			u.Cipher = randutil.RandStringRunes(64)
+		}
+
+		cipher, err := EncryptCipher(u.Cipher, u.ProtectPassword)
+
+		if err != nil {
+			return err
+		}
+
+		u.Cipher = cipher
+	}
 	return nil
 }
 
