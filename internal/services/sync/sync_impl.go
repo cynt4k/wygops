@@ -2,7 +2,9 @@ package sync
 
 import (
 	"fmt"
+	"time"
 
+	"github.com/cynt4k/wygops/cmd/config"
 	"github.com/cynt4k/wygops/internal/repository"
 	"github.com/cynt4k/wygops/internal/services/ldap"
 	"github.com/leandro-lugaresi/hub"
@@ -11,23 +13,33 @@ import (
 
 // Service : Sync service struct
 type Service struct {
-	hub        *hub.Hub
-	repo       repository.Repository
-	ldap       *ldap.LDAP
-	logger     *zap.Logger
-	sourceType string
+	hub           *hub.Hub
+	repo          repository.Repository
+	ldap          ldap.LDAP
+	logger        *zap.Logger
+	duration      time.Duration
+	syncInterrupt chan bool
+	sourceType    string
 }
 
 // NewService : Create a new sync service
-func NewService(repo repository.Repository, hub *hub.Hub, source interface{}, logger *zap.Logger) (Sync, error) {
+func NewService(repo repository.Repository, hub *hub.Hub, source interface{}, logger *zap.Logger, config *config.GeneralSync) (Sync, error) {
 	service := &Service{
 		hub:  hub,
 		repo: repo,
 	}
 
+	duration, err := time.ParseDuration(config.Interval)
+
+	if err != nil {
+		return nil, err
+	}
+
+	service.duration = duration
+
 	switch sourceType := source.(type) {
 	case *ldap.LDAP:
-		service.ldap = sourceType
+		service.ldap = *sourceType
 		service.sourceType = "ldap"
 		break
 	default:
@@ -39,7 +51,12 @@ func NewService(repo repository.Repository, hub *hub.Hub, source interface{}, lo
 
 // Start : Start the sync service
 func (s *Service) Start() error {
-	return nil
+	switch s.sourceType {
+	case "ldap":
+		return s.startLdap()
+	default:
+		return fmt.Errorf("unknown source type - check the initialization")
+	}
 }
 
 // Stop : Stop the sync service

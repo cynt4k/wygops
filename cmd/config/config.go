@@ -22,10 +22,16 @@ type GeneralSubnet struct {
 	GatewayV6 string `yaml:"gatewayV6"`
 }
 
+// GeneralSync : Config struct for the synchronisation
+type GeneralSync struct {
+	Interval string `yaml:"interval"`
+}
+
 // General : Config struct for general settings
 type General struct {
 	User   GeneralUser   `yaml:"user"`
 	Subnet GeneralSubnet `yaml:"subnet"`
+	Sync   GeneralSync   `yaml:"sync"`
 }
 
 // Database : Config struct for the database

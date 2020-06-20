@@ -141,7 +141,27 @@ func (repo *GormRepository) GetGroup(groupID uint) (*models.Group, error) {
 	return &group, nil
 }
 
+// GetGroupByName : Get the group by its name
+func (repo *GormRepository) GetGroupByName(name string) (*models.Group, error) {
+	var group models.Group
+	if err := repo.db.Scopes(userGroupPreloads).First(&group, &models.Group{Name: name}).Error; err != nil {
+		return nil, convertError(err)
+	}
+	return &group, nil
+}
+
+// GetGroupsByUser : Get all grous for an user
+func (repo *GormRepository) GetGroupsByUser(userID uint) (*[]models.Group, error) {
+	var groups []models.Group
+
+	if err := repo.db.Scopes(userGroupPreloads).Find(&groups, &models.UserGroup{UserID: userID}).Error; err != nil {
+		return nil, convertError(err)
+	}
+
+	return &groups, nil
+}
+
 func userGroupPreloads(db *gorm.DB) *gorm.DB {
 	return db.
-		Preload("Users")
+		Preload("Users").Preload("Groups")
 }

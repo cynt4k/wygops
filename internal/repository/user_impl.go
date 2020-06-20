@@ -53,6 +53,28 @@ func (repo *GormRepository) GetUser(userID uint) (*models.User, error) {
 	return getUser(repo.db, false, &user)
 }
 
+// GetUsers : Get all users
+func (repo *GormRepository) GetUsers() (*[]models.User, error) {
+	var users []models.User
+	if err := repo.db.Find(&users, models.User{}).Error; err != nil {
+		return nil, err
+	}
+
+	return &users, nil
+}
+
+// GetLdapUsers : Get all ldap users
+func (repo *GormRepository) GetLdapUsers() (*[]models.User, error) {
+	var users []models.User
+	if err := repo.db.Find(&users, models.User{
+		Type: "ldap",
+	}).Error; err != nil {
+		return nil, err
+	}
+
+	return &users, nil
+}
+
 // GetUserByUsername : Get the user by the username
 func (repo *GormRepository) GetUserByUsername(username string) (*models.User, error) {
 	user := models.User{
