@@ -73,7 +73,7 @@ func (s *Service) FindUser(name string, recursiveGroup bool) (*User, error) {
 
 // GetUser : Get an LDAP User by its unique name
 func (s *Service) GetUser(name string, recursiveGroup bool) (*User, error) {
-	return s.getUser(name, false, true)
+	return s.getUser(name, false, recursiveGroup)
 }
 
 func (s *Service) getUser(username string, filterLdap bool, recursiveGroup bool) (*User, error) {

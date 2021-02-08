@@ -1,9 +1,12 @@
 package sync
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/cynt4k/wygops/internal/models"
+	"github.com/cynt4k/wygops/internal/repository"
+	"github.com/cynt4k/wygops/pkg/util/array"
 )
 
 type ldapSyncJob struct {
@@ -15,7 +18,7 @@ func (s *Service) startLdap() error {
 		return fmt.Errorf("ldap sync not initialized - check the initialization")
 	}
 
-	s.runTimer(ldapSync)
+	go s.runTimer(ldapSync)
 	return nil
 }
 
@@ -40,7 +43,7 @@ func (s *ldapSyncJob) syncUser() error {
 	}
 
 	for _, user := range *dbUsers {
-		ldapUser, err := s.sync.ldap.GetUser(user.Username, true)
+		ldapUser, err := s.sync.ldap.FindUser(user.Username, true)
 		if err != nil {
 			return err
 		}
@@ -56,7 +59,9 @@ func (s *ldapSyncJob) syncUser() error {
 		for _, group := range ldapUser.Groups {
 			dbGroup, err := s.sync.repo.GetGroupByName(group)
 			if err != nil {
-				return err
+				if !errors.Is(err, repository.ErrNotFound) {
+					return err
+				}
 			}
 
 			if dbGroup == nil {
@@ -98,7 +103,14 @@ func (s *ldapSyncJob) syncUser() error {
 					return err
 				}
 			}
-			continue
+
+			if !array.ContainsEntry(ldapUser.Groups, group.Name) {
+				err = s.sync.repo.RemoveUserFromGroup(user.ID, group.ID)
+
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 	return nil

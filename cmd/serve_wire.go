@@ -8,6 +8,7 @@ import (
 	"github.com/cynt4k/wygops/internal/router"
 	service "github.com/cynt4k/wygops/internal/services"
 	"github.com/cynt4k/wygops/internal/services/ldap"
+	"github.com/cynt4k/wygops/internal/services/sync"
 	"github.com/cynt4k/wygops/internal/services/user"
 	"github.com/cynt4k/wygops/internal/services/wireguard"
 	"github.com/google/wire"
@@ -22,6 +23,7 @@ func newHttpServer(hub *hub.Hub, db *gorm.DB, repo repository.Repository, logger
 		ldap.NewService,
 		user.NewService,
 		wireguard.NewService,
+		sync.NewLDAPService,
 		wire.Struct(new(service.Services), "*"),
 		wire.Struct(new(HTTPServer), "*"),
 	)

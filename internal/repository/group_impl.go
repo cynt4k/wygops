@@ -90,7 +90,7 @@ func (repo *GormRepository) AddUserToGroup(userID uint, groupID uint) error {
 func (repo *GormRepository) RemoveUserFromGroup(userID uint, groupID uint) error {
 	err := repo.db.Transaction(func(tx *gorm.DB) error {
 		var group models.Group
-		if err := tx.Scopes(userGroupPreloads).First(&group, &models.Group{ID: groupID}).Error; err != nil {
+		if err := tx.Scopes(userPreloads).First(&group, &models.Group{ID: groupID}).Error; err != nil {
 			return convertError(err)
 		}
 
@@ -135,7 +135,7 @@ func (repo *GormRepository) DeleteGroup(groupID uint) error {
 // GetGroup : Get the group
 func (repo *GormRepository) GetGroup(groupID uint) (*models.Group, error) {
 	var group models.Group
-	if err := repo.db.Scopes(userGroupPreloads).First(&group, &models.Group{ID: groupID}).Error; err != nil {
+	if err := repo.db.Scopes(userPreloads).First(&group, &models.Group{ID: groupID}).Error; err != nil {
 		return nil, convertError(err)
 	}
 	return &group, nil
@@ -144,7 +144,7 @@ func (repo *GormRepository) GetGroup(groupID uint) (*models.Group, error) {
 // GetGroupByName : Get the group by its name
 func (repo *GormRepository) GetGroupByName(name string) (*models.Group, error) {
 	var group models.Group
-	if err := repo.db.Scopes(userGroupPreloads).First(&group, &models.Group{Name: name}).Error; err != nil {
+	if err := repo.db.Scopes(userPreloads).First(&group, &models.Group{Name: name}).Error; err != nil {
 		return nil, convertError(err)
 	}
 	return &group, nil
@@ -153,15 +153,29 @@ func (repo *GormRepository) GetGroupByName(name string) (*models.Group, error) {
 // GetGroupsByUser : Get all grous for an user
 func (repo *GormRepository) GetGroupsByUser(userID uint) (*[]models.Group, error) {
 	var groups []models.Group
+	var userGroups []models.UserGroup
 
-	if err := repo.db.Scopes(userGroupPreloads).Find(&groups, &models.UserGroup{UserID: userID}).Error; err != nil {
+	if err := repo.db.Scopes(userGroupPreloads).
+		Model(&models.UserGroup{}).
+		Where(&models.UserGroup{UserID: userID}).
+		Find(&userGroups).Error; err != nil {
 		return nil, convertError(err)
+	}
+
+	for _, userGroup := range userGroups {
+		groups = append(groups, userGroup.Group)
 	}
 
 	return &groups, nil
 }
 
+func userPreloads(db *gorm.DB) *gorm.DB {
+	return db.
+		Preload("Users")
+}
+
 func userGroupPreloads(db *gorm.DB) *gorm.DB {
 	return db.
-		Preload("Users").Preload("Groups")
+		Preload("User").
+		Preload("Group")
 }

@@ -42,6 +42,9 @@ func (g *Group) IsMember(userID uint) bool {
 type UserGroup struct {
 	GroupID uint `gorm:"not null;primary_key;auto_increment:false" json:"groupId"`
 	UserID  uint `gorm:"not null;primary_key;auto_increment:false" json:"userId"`
+
+	Group Group `gorm:"association_autoupdate:false;association_autocreate:false;preload:false;foreignkey:GroupID" json:"groups"`
+	User  User  `gorm:"association_autoupdate:false;association_autocreate:false;preload:false;foreignkey:UserID" json:"users"`
 }
 
 // TableName : Get the table name

@@ -22,6 +22,7 @@ func (s *Service) runTimer(cb syncFunction) {
 			return
 		case <-ticker.C:
 			s.logger.Debug(fmt.Sprintf("running scheduled sync for %s", s.sourceType))
+			go cb(s)
 		}
 	}
 }

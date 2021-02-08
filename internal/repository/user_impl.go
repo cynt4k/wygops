@@ -107,7 +107,9 @@ func getUser(tx *gorm.DB, withDevices bool, where ...interface{}) (*models.User,
 // DeleteUser : Delete an user
 func (repo *GormRepository) DeleteUser(userID uint) error {
 	err := repo.db.Transaction(func(tx *gorm.DB) error {
-		var user models.User
+		user := models.User{
+			ID: userID,
+		}
 		if err := tx.Where(&models.UserGroup{UserID: userID}).Delete(&models.UserGroup{}).Error; err != nil {
 			return err
 		}
