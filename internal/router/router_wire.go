@@ -3,6 +3,7 @@
 package router
 
 import (
+	"github.com/cynt4k/wygops/cmd/config"
 	"github.com/cynt4k/wygops/internal/repository"
 	v1 "github.com/cynt4k/wygops/internal/router/v1"
 	service "github.com/cynt4k/wygops/internal/services"
@@ -12,10 +13,10 @@ import (
 	"go.uber.org/zap"
 )
 
-func newRouter(hub *hub.Hub, db *gorm.DB, repo repository.Repository, ss *service.Services, logger *zap.Logger) *Router {
+func newRouter(hub *hub.Hub, db *gorm.DB, repo repository.Repository, config *config.Config, ss *service.Services, logger *zap.Logger) *Router {
 	wire.Build(
 		service.ProviderSet,
-		newGin,
+		newEcho,
 		wire.Struct(new(v1.Handlers), "*"),
 		wire.Struct(new(Router), "*"),
 	)

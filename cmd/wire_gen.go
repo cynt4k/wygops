@@ -45,11 +45,11 @@ func newHttpServer(hub2 *hub.Hub, db *gorm.DB, repo repository.Repository, logge
 		Wireguard: wireguardWireguard,
 		SyncLdap:  syncSync,
 	}
-	engine := router.Init(hub2, db, repo, services, logger)
+	echo := router.Setup(hub2, db, repo, config2, services, logger)
 	httpServer := &HTTPServer{
 		Logger: logger,
 		SS:     services,
-		Router: engine,
+		Router: echo,
 		Hub:    hub2,
 		Repo:   repo,
 	}
