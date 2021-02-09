@@ -11,4 +11,5 @@ var ProviderSet = wire.NewSet(wire.FieldsOf(new(*Services),
 	"User",
 	"Ldap",
 	"Wireguard",
+	"SyncLdap"
 ))

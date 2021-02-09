@@ -7,6 +7,8 @@ general:
     gatewayV6: "fc00:cafe:c0d3::1"
   user:
     maxDevices: 3
+  sync:
+    interval: "5m"
 wireguard:
   interface: "wg0"
 database:

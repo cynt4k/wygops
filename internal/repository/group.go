@@ -8,5 +8,7 @@ type GroupRepository interface {
 	AddUserToGroup(userID uint, groupID uint) error
 	RemoveUserFromGroup(userID uint, groupID uint) error
 	GetGroup(uint) (*models.Group, error)
+	GetGroupByName(name string) (*models.Group, error)
+	GetGroupsByUser(userID uint) (*[]models.Group, error)
 	DeleteGroup(groupID uint) error
 }

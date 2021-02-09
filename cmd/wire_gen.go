@@ -11,6 +11,7 @@ import (
 	"github.com/cynt4k/wygops/internal/router"
 	"github.com/cynt4k/wygops/internal/services"
 	"github.com/cynt4k/wygops/internal/services/ldap"
+	"github.com/cynt4k/wygops/internal/services/sync"
 	"github.com/cynt4k/wygops/internal/services/user"
 	"github.com/cynt4k/wygops/internal/services/wireguard"
 	"github.com/jinzhu/gorm"
@@ -34,10 +35,15 @@ func newHttpServer(hub2 *hub.Hub, db *gorm.DB, repo repository.Repository, logge
 	if err != nil {
 		return nil, err
 	}
+	syncSync, err := sync.NewLDAPService(repo, hub2, ldapLDAP, logger, config2)
+	if err != nil {
+		return nil, err
+	}
 	services := &service.Services{
 		User:      userService,
 		Ldap:      ldapLDAP,
 		Wireguard: wireguardWireguard,
+		SyncLdap:  syncSync,
 	}
 	engine := router.Init(hub2, db, repo, services, logger)
 	httpServer := &HTTPServer{

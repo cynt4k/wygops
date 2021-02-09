@@ -53,6 +53,28 @@ func (repo *GormRepository) GetUser(userID uint) (*models.User, error) {
 	return getUser(repo.db, false, &user)
 }
 
+// GetUsers : Get all users
+func (repo *GormRepository) GetUsers() (*[]models.User, error) {
+	var users []models.User
+	if err := repo.db.Find(&users, models.User{}).Error; err != nil {
+		return nil, err
+	}
+
+	return &users, nil
+}
+
+// GetLdapUsers : Get all ldap users
+func (repo *GormRepository) GetLdapUsers() (*[]models.User, error) {
+	var users []models.User
+	if err := repo.db.Find(&users, models.User{
+		Type: "ldap",
+	}).Error; err != nil {
+		return nil, err
+	}
+
+	return &users, nil
+}
+
 // GetUserByUsername : Get the user by the username
 func (repo *GormRepository) GetUserByUsername(username string) (*models.User, error) {
 	user := models.User{
@@ -85,7 +107,9 @@ func getUser(tx *gorm.DB, withDevices bool, where ...interface{}) (*models.User,
 // DeleteUser : Delete an user
 func (repo *GormRepository) DeleteUser(userID uint) error {
 	err := repo.db.Transaction(func(tx *gorm.DB) error {
-		var user models.User
+		user := models.User{
+			ID: userID,
+		}
 		if err := tx.Where(&models.UserGroup{UserID: userID}).Delete(&models.UserGroup{}).Error; err != nil {
 			return err
 		}
