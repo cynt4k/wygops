@@ -93,10 +93,14 @@ func getLogger() (logger *zap.Logger) {
 }
 
 func getCLILogger() (logger *zap.Logger) {
-	level := zap.NewAtomicLevel()
-	if c.DevMode {
+	var level zap.AtomicLevel
 
+	if c.DevMode {
+		level = zap.NewAtomicLevelAt(zapcore.DebugLevel)
+	} else {
+		level = zap.NewAtomicLevel()
 	}
+	zap.NewAtomicLevelAt(zapcore.DebugLevel)
 	cfg := zap.Config{
 		Level:       level,
 		Development: c.DevMode,
@@ -118,5 +122,5 @@ func getCLILogger() (logger *zap.Logger) {
 		ErrorOutputPaths: []string{"stderr"},
 	}
 	logger, _ = cfg.Build()
-	return
+	return logger
 }
