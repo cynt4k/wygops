@@ -102,6 +102,7 @@ func (s *ldapSyncJob) syncUser() error {
 				if err != nil {
 					return err
 				}
+				continue
 			}
 
 			if !array.ContainsEntry(ldapUser.Groups, group.Name) {
