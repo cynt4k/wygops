@@ -32,7 +32,7 @@ func Setup(hub *hub.Hub, db *gorm.DB, repo repository.Repository, config *config
 		return c.String(http.StatusOK, http.StatusText(http.StatusOK))
 	}, middlewares.AccessLoggingIgnore(), middlewares.MetricsIgnore())
 
-	r.e.GET("/metrics", echo.WrapHandler(promhttp.Handler()))
+	r.e.GET("/metrics", echo.WrapHandler(promhttp.Handler()), middlewares.MetricsIgnore())
 
 	r.v1.Setup(r.e.Group("/api"))
 
