@@ -5,7 +5,7 @@ import (
 
 	"github.com/cynt4k/wygops/internal/repository"
 	service "github.com/cynt4k/wygops/internal/services"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/leandro-lugaresi/hub"
 	"go.uber.org/zap"
 )
@@ -14,7 +14,7 @@ import (
 type HTTPServer struct {
 	Logger *zap.Logger
 	SS     *service.Services
-	Router *gin.Engine
+	Router *echo.Echo
 	Hub    *hub.Hub
 	Repo   repository.Repository
 }
@@ -70,5 +70,5 @@ func ServeServer() error {
 
 // Start : Start the HTTPServer
 func (s *HTTPServer) Start(address string) error {
-	return s.Router.Run(address)
+	return s.Router.Start(address)
 }

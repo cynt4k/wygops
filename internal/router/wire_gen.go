@@ -6,6 +6,7 @@
 package router
 
 import (
+	"github.com/cynt4k/wygops/cmd/config"
 	"github.com/cynt4k/wygops/internal/repository"
 	"github.com/cynt4k/wygops/internal/router/v1"
 	"github.com/cynt4k/wygops/internal/services"
@@ -16,8 +17,8 @@ import (
 
 // Injectors from router_wire.go:
 
-func newRouter(hub2 *hub.Hub, db *gorm.DB, repo repository.Repository, ss *service.Services, logger *zap.Logger) *Router {
-	engine := newGin(logger, repo)
+func newRouter(hub2 *hub.Hub, db *gorm.DB, repo repository.Repository, config2 *config.Config, ss *service.Services, logger *zap.Logger) *Router {
+	echo := newEcho(logger, config2, repo)
 	ldap := ss.Ldap
 	wireguard := ss.Wireguard
 	handlers := &v1.Handlers{
@@ -28,8 +29,8 @@ func newRouter(hub2 *hub.Hub, db *gorm.DB, repo repository.Repository, ss *servi
 		Wireguard: wireguard,
 	}
 	router := &Router{
-		app: engine,
-		v1:  handlers,
+		e:  echo,
+		v1: handlers,
 	}
 	return router
 }

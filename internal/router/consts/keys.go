@@ -1,6 +1,7 @@
 package consts
 
 const (
-	// KeyRepo : Const key for repo
-	KeyRepo = "_repo"
+	KeyRepo          = "_repo"
+	KeyIgnoreLogging = "ignoreLogging"
+	KeyIgnoreMetrics = "ignoreMetrics"
 )

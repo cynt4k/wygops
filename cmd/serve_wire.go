@@ -19,7 +19,7 @@ import (
 
 func newHttpServer(hub *hub.Hub, db *gorm.DB, repo repository.Repository, logger *zap.Logger, config *config.Config) (*HTTPServer, error) {
 	wire.Build(
-		router.Init,
+		router.Setup,
 		ldap.NewService,
 		user.NewService,
 		wireguard.NewService,

@@ -1,54 +1,70 @@
 package router
 
 import (
+	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/cynt4k/wygops/cmd/config"
 	"github.com/cynt4k/wygops/internal/repository"
 	"github.com/cynt4k/wygops/internal/router/extension"
+	"github.com/cynt4k/wygops/internal/router/middlewares"
 	v1 "github.com/cynt4k/wygops/internal/router/v1"
 	service "github.com/cynt4k/wygops/internal/services"
-	ginzap "github.com/gin-contrib/zap"
-	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/leandro-lugaresi/hub"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 )
 
-var (
-	app = Router{}
-)
-
 // Router : Struct for the router class
 type Router struct {
-	app *gin.Engine
-	v1  *v1.Handlers
+	e  *echo.Echo
+	v1 *v1.Handlers
 }
 
-// Init : Initialize the Router
-func Init(hub *hub.Hub, db *gorm.DB, repo repository.Repository, ss *service.Services, logger *zap.Logger) *gin.Engine {
-	r := newRouter(hub, db, repo, ss, logger.Named("router"))
-	api := r.app.Group("/api")
+func Setup(hub *hub.Hub, db *gorm.DB, repo repository.Repository, config *config.Config, ss *service.Services, logger *zap.Logger) *echo.Echo {
+	r := newRouter(hub, db, repo, config, ss, logger.Named("router"))
 
-	r.app.GET("/", func(c *gin.Context) { c.String(http.StatusOK, http.StatusText(http.StatusOK)) })
-	api.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, http.StatusText(http.StatusOK)) })
-	api.GET("/metrics", gin.WrapH(promhttp.Handler()))
+	r.e.GET("/", func(c echo.Context) error { return c.String(http.StatusOK, http.StatusText(http.StatusOK)) })
+	r.e.GET("/ping", func(c echo.Context) error {
+		return c.String(http.StatusOK, http.StatusText(http.StatusOK))
+	}, middlewares.AccessLoggingIgnore(), middlewares.MetricsIgnore())
 
-	r.v1.Init(api)
+	r.e.GET("/metrics", echo.WrapHandler(promhttp.Handler()), middlewares.MetricsIgnore())
 
-	return r.app
-}
+	r.v1.Setup(r.e.Group("/api"))
 
-func newGin(logger *zap.Logger, repo repository.Repository) *gin.Engine {
-	if !config.GetConfig().DevMode {
-		gin.SetMode(gin.ReleaseMode)
+	if config.DevMode {
+		routes := r.e.Routes()
+
+		logger.Info("Registered routes are:")
+		for _, route := range routes {
+			logger.Info(fmt.Sprintf("Method: %s\tPath: %s\tFunction: %s", route.Method, route.Path, route.Name))
+		}
 	}
-	g := gin.New()
-	g.Use(ginzap.Ginzap(logger, time.RFC3339, true))
-	g.Use(ginzap.RecoveryWithZap(logger, true))
-	g.Use(extension.Wrap(repo))
 
-	return g
+	return r.e
+}
+
+func newEcho(logger *zap.Logger, config *config.Config, repo repository.Repository) *echo.Echo {
+	const maxAge = 300
+	e := echo.New()
+
+	e.HideBanner = true
+	e.HidePort = true
+	e.HTTPErrorHandler = extension.ErrorHandler(logger)
+
+	e.Use(middlewares.RequestID())
+	e.Use(middlewares.AccessLogging(logger.Named("access_log"), config.DevMode))
+	e.Use(extension.Wrap(repo))
+	e.Use(middlewares.RequestCounter())
+	e.Use(middlewares.HTTPDuration())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		ExposeHeaders: []string{echo.HeaderXRequestID},
+		AllowHeaders:  []string{echo.HeaderContentType, echo.HeaderAuthorization},
+		MaxAge:        maxAge,
+	}))
+	return e
 }

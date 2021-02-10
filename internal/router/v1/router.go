@@ -6,7 +6,7 @@ import (
 	"github.com/cynt4k/wygops/internal/repository"
 	"github.com/cynt4k/wygops/internal/services/ldap"
 	"github.com/cynt4k/wygops/internal/services/wireguard"
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/leandro-lugaresi/hub"
 	"go.uber.org/zap"
 )
@@ -26,27 +26,76 @@ type Config struct {
 	Revision string
 }
 
-// Init : Initialize the v1 Routes
-func (h *Handlers) Init(g *gin.RouterGroup) {
-	api := g.Group("/v1")
-	api.GET("/", func(c *gin.Context) { c.String(http.StatusOK, http.StatusText(http.StatusOK)) })
-	api.GET("/test", func(c *gin.Context) {
-		c.String(http.StatusOK, http.StatusText(http.StatusOK))
-		// user, err := h.LDAP.FindUser("developer", true)
-		// if err != nil {
-		// 	c.JSON(http.StatusNoContent, gin.H{
-		// 		"message": "no content",
-		// 	})
-		// }
-		// c.JSON(http.StatusOK, user)
+func (h *Handlers) Setup(e *echo.Group) {
+	api := e.Group("/v1")
 
-		// group, err := h.LDAP.GetGroupAndUsers("Validators", true)
+	api.GET("/", func(c echo.Context) error { return c.String(http.StatusOK, http.StatusText(http.StatusOK)) })
 
-		// if err != nil {
-		// 	c.JSON(http.StatusNoContent, gin.H{
-		// 		"message": "no content",
-		// 	})
-		// }
-		// c.JSON(http.StatusOK, group)
-	})
 }
+
+// Init : Initialize the v1 Routes
+// func (h *Handlers) Init(g *gin.RouterGroup) {
+// 	api := g.Group("/v1")
+// 	api.GET("/", func(c *gin.Context) { c.String(http.StatusOK, http.StatusText(http.StatusOK)) })
+// 	api.GET("/test", func(c *gin.Context) {
+// 		c.String(http.StatusOK, http.StatusText(http.StatusOK))
+// 	})
+// 	api.GET("/test2", func(c *gin.Context) {
+// 		ldapUser, err := h.LDAP.FindUser("developer", true)
+// 		if err != nil {
+// 			c.JSON(http.StatusNoContent, gin.H{
+// 				"message": "no content",
+// 			})
+// 			return
+// 		}
+
+// 		user := models.User{
+// 			Username:        ldapUser.Username,
+// 			ProtectPassword: "asdf",
+// 			FirstName:       ldapUser.FirstName,
+// 			LastName:        ldapUser.LastName,
+// 			Mail:            ldapUser.Mail,
+// 			Type:            "ldap",
+// 		}
+
+// 		savedUser, err := h.Repo.CreateUser(&user)
+
+// 		if err == repository.ErrAlreadyExists {
+// 			savedUser, err = h.Repo.GetUserByUsername(user.Username)
+// 			if err != nil {
+// 				c.JSON(http.StatusNoContent, gin.H{
+// 					"message": "no content",
+// 				})
+// 				return
+// 			}
+// 		}
+
+// 		peer, err := h.Wireguard.CreatePeer()
+
+// 		if err != nil {
+// 			c.JSON(http.StatusNoContent, gin.H{
+// 				"message": "no content",
+// 			})
+// 			return
+// 		}
+
+// 		device := models.Device{
+// 			UserID:      savedUser.ID,
+// 			IPv4Address: peer.IPV4Address.String(),
+// 			IPv6Address: peer.IPV6Address.String(),
+// 			PrivateKey:  peer.PrivateKey.String(),
+// 			PublicKey:   peer.PublicKey.String(),
+// 			Name:        "device",
+// 		}
+
+// 		deviceSaved, err := h.Repo.CreateDevice(&device)
+
+// 		if err != nil {
+// 			c.JSON(http.StatusNoContent, gin.H{
+// 				"message": "no content",
+// 			})
+// 		}
+
+// 		c.JSON(http.StatusOK, deviceSaved)
+// 	})
+// }
