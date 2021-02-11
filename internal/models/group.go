@@ -10,7 +10,7 @@ import (
 type Group struct {
 	ID        uint         `gorm:"primary_key"`
 	Name      string       `gorm:"size:255;not null;unique" json:"name"`
-	Users     []*UserGroup `gorm:"association_autoupdate:false;association_autocreate:false;preload:false;foreignkey:GroupID" json:"users"`
+	Users     []*UserGroup `gorm:"association_autoupdate:false;association_autocreate:false;preload:false;foreignkey:GroupID" json:"users"` // nolint:lll
 	Type      string       `gorm:"size:100;not null" json:"type"`
 	CreatedAt time.Time    `gorm:"precision:6" json:"createdAt"`
 	UpdatedAt time.Time    `gorm:"precision:6" json:"updatedAt"`
@@ -43,8 +43,8 @@ type UserGroup struct {
 	GroupID uint `gorm:"not null;primary_key;auto_increment:false" json:"groupId"`
 	UserID  uint `gorm:"not null;primary_key;auto_increment:false" json:"userId"`
 
-	Group Group `gorm:"association_autoupdate:false;association_autocreate:false;preload:false;foreignkey:GroupID" json:"groups"`
-	User  User  `gorm:"association_autoupdate:false;association_autocreate:false;preload:false;foreignkey:UserID" json:"users"`
+	Group Group `gorm:"association_autoupdate:false;association_autocreate:false;preload:false;foreignkey:GroupID" json:"groups"` // nolint:lll
+	User  User  `gorm:"association_autoupdate:false;association_autocreate:false;preload:false;foreignkey:UserID" json:"users"`   // nolint:lll
 }
 
 // TableName : Get the table name

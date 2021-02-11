@@ -23,12 +23,24 @@ type Service struct {
 }
 
 // NewLDAPService : Create a new sync service
-func NewLDAPService(repo repository.Repository, hub *hub.Hub, source ldap.LDAP, logger *zap.Logger, config *config.Config) (Sync, error) {
+func NewLDAPService(
+	repo repository.Repository,
+	hub *hub.Hub,
+	source ldap.LDAP,
+	logger *zap.Logger,
+	config *config.Config,
+) (Sync, error) {
 	return newService(repo, hub, source, logger, config)
 }
 
 // newService : Create a new sync service
-func newService(repo repository.Repository, hub *hub.Hub, source interface{}, logger *zap.Logger, config *config.Config) (Sync, error) {
+func newService(
+	repo repository.Repository,
+	hub *hub.Hub,
+	source interface{},
+	logger *zap.Logger,
+	config *config.Config,
+) (Sync, error) {
 	service := &Service{
 		hub:    hub,
 		repo:   repo,
@@ -47,7 +59,6 @@ func newService(repo repository.Repository, hub *hub.Hub, source interface{}, lo
 	case ldap.LDAP:
 		service.ldap = sourceType
 		service.sourceType = "ldap"
-		break
 	default:
 		return nil, fmt.Errorf("no valid source type added")
 	}

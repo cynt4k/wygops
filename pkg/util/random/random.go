@@ -1,8 +1,10 @@
 package random
 
 import (
+	crand "crypto/rand"
+	"encoding/binary"
+	"log"
 	"math/rand"
-	// "crypto/rand"
 
 	"unsafe"
 )
@@ -14,12 +16,16 @@ const (
 	rs6LetterIdxMax  = 63 / rs6LetterIdxBits
 )
 
+var (
+	rnd = rand.New(CryptoSource{}) // nolint:gosec
+)
+
 func AlphaNumeric(n int) string {
 	b := make([]byte, n)
-	cache, remain := rand.Int63(), rs6LetterIdxMax // nolint:gosec
+	cache, remain := rnd.Int63(), rs6LetterIdxMax
 	for i := n - 1; i >= 0; {
 		if remain == 0 {
-			cache, remain = rand.Int63(), rs6LetterIdxMax // nolint:gosec
+			cache, remain = rnd.Int63(), rs6LetterIdxMax
 		}
 		idx := int(cache & rs6LetterIdxMask)
 		if idx < len(rs6Letters) {
@@ -30,4 +36,20 @@ func AlphaNumeric(n int) string {
 		remain--
 	}
 	return *(*string)(unsafe.Pointer(&b))
+}
+
+type CryptoSource struct{}
+
+func (s CryptoSource) Seed(seed int64) {}
+
+func (s CryptoSource) Int63() int64 {
+	return int64(s.Uint64() & ^uint64(1<<63)) // nolint:gomnd
+}
+
+func (s CryptoSource) Uint64() (v uint64) {
+	err := binary.Read(crand.Reader, binary.BigEndian, &v)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return v
 }

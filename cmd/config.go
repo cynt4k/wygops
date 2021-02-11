@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 
 	"github.com/cynt4k/wygops/cmd/config"
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql" // import for gorm
 	"github.com/jinzhu/gorm"
 	"github.com/spf13/viper"
-	"github.com/wantedly/gorm-zap"
+	gormzap "github.com/wantedly/gorm-zap"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 )

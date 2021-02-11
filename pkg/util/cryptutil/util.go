@@ -3,23 +3,24 @@ package cryptutil
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/md5"
+	"crypto/md5" // nolint:gosec
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
 	"io"
 )
 
-// CreateHash : Hash a string with md5
+// CreateHash : Hash a string with sha256
 func createHash(key string) string {
-	hasher := md5.New()
-	hasher.Write([]byte(key))
+	hasher := md5.New() // nolint:gosec
+	_, _ = hasher.Write([]byte(key))
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
 // EncryptData : Encrypt given data with a password
-func EncryptData(data []byte, passwword string) ([]byte, error) {
-	block, err := aes.NewCipher([]byte(createHash(passwword)))
+func EncryptData(data []byte, password string) ([]byte, error) {
+	hash := createHash(password)
+	block, err := aes.NewCipher([]byte(hash))
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +72,7 @@ func DecryptBase64ToString(data string, password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	decryptedData, err := DecryptData([]byte(base64Decoded), password)
+	decryptedData, err := DecryptData(base64Decoded, password)
 	if err != nil {
 		return "", err
 	}

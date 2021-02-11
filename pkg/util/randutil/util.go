@@ -3,16 +3,19 @@ package randutil
 import (
 	"math/rand"
 	"time"
+
+	"github.com/cynt4k/wygops/pkg/util/random"
 )
 
 var (
 	initialized = false
 	letterRunes = []rune("1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	rnd         = rand.New(random.CryptoSource{}) // nolint:gosec
 )
 
-func init() {
+func init() { // nolint:gochecknoinits
 	if !initialized {
-		rand.Seed(time.Now().UnixNano())
+		rnd.Seed(time.Now().UnixNano())
 	}
 }
 
@@ -20,7 +23,7 @@ func init() {
 func RandStringRunes(n int) string {
 	b := make([]rune, n)
 	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+		b[i] = letterRunes[rnd.Intn(len(letterRunes))]
 	}
 	return string(b)
 }

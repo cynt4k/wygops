@@ -32,10 +32,14 @@ func Execute() error {
 	return rootCmd.Execute()
 }
 
-func init() {
+func init() { // nolint:gochecknoinits
 	cobra.OnInitialize(initConfig)
 	rootCmd.SetHelpFunc(func(c *cobra.Command, args []string) {
-		c.Usage()
+		err := c.Usage()
+
+		if err != nil {
+			log.Fatal(err)
+		}
 		os.Exit(0)
 	})
 	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "config file")
@@ -54,12 +58,15 @@ func initConfig() {
 		_configDir := filepath.Join(fileDir, "config")
 		viper.AddConfigPath(_configDir)
 
-		readDefaultConfig(_configDir, c)
+		err = readDefaultConfig(_configDir, c)
+
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		switch env := strings.ToLower(os.Getenv("ENV")); env {
 		case "dev":
 			viper.SetConfigFile(filepath.Join(_configDir, "dev.yaml"))
-			break
 		case "prd":
 			viper.SetConfigFile(filepath.Join(_configDir, "prd.yaml"))
 		case "":

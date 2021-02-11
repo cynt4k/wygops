@@ -15,22 +15,19 @@ import (
 )
 
 var (
-	//Version : Populated during build time
+	// Version : Populated during build time
 	Version string = "Unknown"
-	//Build : Populated during build time
+	// Build : Populated during build time
 	Build string = "Unknown"
 )
 
 func main() {
-
 	err := cmd.Execute()
 	if err != nil {
 		os.Exit(1)
 	}
 
 	log.Printf("starting wygops version: %s - build: %s", Version, Build)
-	shutdownCtx, shutdown := context.WithCancel(context.Background())
-	defer shutdown()
 
 	config := config.Config{}
 	err = viper.Unmarshal(&config)
@@ -43,6 +40,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("error while serving application %s", err)
 	}
+
+	shutdownCtx, shutdown := context.WithCancel(context.Background())
+	defer shutdown()
 
 	err = waitForInterrupt(shutdownCtx)
 	log.Printf("shuting down: %s", err)

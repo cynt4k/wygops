@@ -69,7 +69,8 @@ func (u *User) BeforeSave() error {
 		}
 		u.ProtectPassword = string(hashedProtectedPassword)
 		if u.Cipher == "" {
-			u.Cipher = randutil.RandStringRunes(64)
+			const randLength = 64
+			u.Cipher = randutil.RandStringRunes(randLength)
 		}
 
 		cipher, err := EncryptCipher(u.Cipher, u.ProtectPassword)

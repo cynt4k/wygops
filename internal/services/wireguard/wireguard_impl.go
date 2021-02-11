@@ -21,7 +21,7 @@ type Service struct {
 	config *config.Wireguard
 	subnet *config.GeneralSubnet
 	logger *zap.Logger
-	peers  []*wgtypes.Peer
+	// peers  []*wgtypes.Peer
 }
 
 var (
@@ -29,7 +29,12 @@ var (
 )
 
 // NewService : Create a new wireguard service
-func NewService(repo repository.Repository, hub *hub.Hub, logger *zap.Logger, config *config.Config) (Wireguard, error) {
+func NewService(
+	repo repository.Repository,
+	hub *hub.Hub,
+	logger *zap.Logger,
+	config *config.Config,
+) (Wireguard, error) {
 	if service != nil {
 		return service, nil
 	}
@@ -69,11 +74,12 @@ func NewService(repo repository.Repository, hub *hub.Hub, logger *zap.Logger, co
 
 func (w *Service) initEventhandler() {
 	go func() {
+		const capSize = 200
 		topics := make([]string, 0, len(handlerMap))
 		for k := range handlerMap {
 			topics = append(topics, k)
 		}
-		for msg := range w.hub.Subscribe(200, topics...).Receiver {
+		for msg := range w.hub.Subscribe(capSize, topics...).Receiver {
 			h, ok := handlerMap[msg.Topic()]
 			if ok {
 				go h(w, msg)
@@ -90,7 +96,6 @@ func (w *Service) init() error {
 	}
 
 	for _, device := range devices {
-
 		publicKey, err := wgtypes.ParseKey(device.PublicKey)
 
 		if err != nil {
@@ -132,9 +137,9 @@ func (w *Service) updatePeer(device *Peer) error {
 	}
 
 	var selectedPeer *wgtypes.Peer
-	for _, peer := range w.server.Peers {
+	for i, peer := range w.server.Peers {
 		if peer.PublicKey.String() == device.PublicKey.String() {
-			selectedPeer = &peer
+			selectedPeer = &w.server.Peers[i]
 		}
 	}
 
@@ -180,7 +185,6 @@ func (w *Service) deletePeer(device *Peer) error {
 			},
 		},
 	})
-
 }
 
 // CreatePeer : Create a new wireguard device

@@ -90,7 +90,6 @@ func (repo *GormRepository) GetUserWithDevices(userID uint) (*models.User, error
 		ID: userID,
 	}
 	return getUser(repo.db, true, &user)
-
 }
 
 func getUser(tx *gorm.DB, withDevices bool, where ...interface{}) (*models.User, error) {

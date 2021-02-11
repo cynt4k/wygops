@@ -32,8 +32,9 @@ func (s *Service) connect() error {
 		return err
 	}
 
+	// TODO: add ssl certificate
 	if s.config.Type == "tls" {
-		err = connection.StartTLS(&tls.Config{InsecureSkipVerify: true})
+		err = connection.StartTLS(&tls.Config{InsecureSkipVerify: true}) // nolint:gosec
 		if err != nil {
 			return err
 		}
@@ -125,7 +126,6 @@ func (s *Service) getUser(username string, filterLdap bool, recursiveGroup bool)
 	user := &User{}
 
 	for _, attr := range foundUser.Attributes {
-
 		switch attr.Name {
 		case s.config.UserRDN:
 			user.Username = attr.Values[0]
@@ -136,9 +136,7 @@ func (s *Service) getUser(username string, filterLdap bool, recursiveGroup bool)
 		case "mail":
 			user.Mail = attr.Values[0]
 		case "memberOf":
-			for _, group := range attr.Values {
-				user.Groups = append(user.Groups, group)
-			}
+			user.Groups = append(user.Groups, attr.Values...)
 		default:
 			continue
 		}
@@ -178,7 +176,6 @@ func (s *Service) getUser(username string, filterLdap bool, recursiveGroup bool)
 		user.Groups = memberGroups
 	}
 	return user, nil
-
 }
 
 func (s *Service) getUserForGroup(group *ldapgo.Entry) ([]*User, error) {

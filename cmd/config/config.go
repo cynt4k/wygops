@@ -1,12 +1,7 @@
 package config
 
 import (
-	_ "github.com/go-sql-driver/mysql"
-)
-
-var (
-	configFile string
-	c          *Config
+	_ "github.com/go-sql-driver/mysql" // import for gorm
 )
 
 // GeneralUser : Config struct for user settings
@@ -76,7 +71,7 @@ type Wireguard struct {
 	Interface string `yaml:"interface"`
 }
 
-// Config type for the config file to be handeld
+// Config type for the config file to be handled
 type Config struct {
 	DevMode   bool      `yaml:"dev"`
 	General   General   `yaml:"general"`
