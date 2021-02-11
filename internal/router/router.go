@@ -24,7 +24,14 @@ type Router struct {
 	v1 *v1.Handlers
 }
 
-func Setup(hub *hub.Hub, db *gorm.DB, repo repository.Repository, config *config.Config, ss *service.Services, logger *zap.Logger) *echo.Echo {
+func Setup(
+	hub *hub.Hub,
+	db *gorm.DB,
+	repo repository.Repository,
+	config *config.Config,
+	ss *service.Services,
+	logger *zap.Logger,
+) *echo.Echo {
 	r := newRouter(hub, db, repo, config, ss, logger.Named("router"))
 
 	r.e.GET("/", func(c echo.Context) error { return c.String(http.StatusOK, http.StatusText(http.StatusOK)) })

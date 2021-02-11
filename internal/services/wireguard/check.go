@@ -7,8 +7,13 @@ import (
 	"regexp"
 
 	"github.com/cynt4k/wygops/internal/models"
+	"github.com/cynt4k/wygops/pkg/util/random"
 	"github.com/dspinhirne/netaddr-go"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
+)
+
+var (
+	rnd = rand.New(random.CryptoSource{}) // nolint:gosec
 )
 
 func (w *Service) checkV4Subnet(ip string) error {
@@ -70,10 +75,10 @@ func (w *Service) getIPV4Subnet() ([]string, error) {
 	for ip := ip.Mask(ipnet.Mask); ipnet.Contains(ip); inc(ip) {
 		ips = append(ips, ip.String())
 	}
-
+	const maxLenIPs = 2
 	lenIPs := len(ips)
 	switch {
-	case lenIPs < 2:
+	case lenIPs < maxLenIPs:
 		return ips, nil
 	default:
 		return ips[1 : len(ips)-1], nil
@@ -132,13 +137,13 @@ func (w *Service) getAvailableIPV4(devices []*models.Device) (*net.IP, error) {
 }
 
 func (w *Service) getAvailableIPV6(devices []*models.Device) (*net.IP, error) {
-
 	genAddress := func(sn string, retries int) (net.IP, error) {
-		re, _ := regexp.Compile("(^.*)\\/.*")
+		const lenValidIPv6 = 2
+		re := regexp.MustCompile(`(^.*)\\/.*`)
 
 		matches := re.FindStringSubmatch(sn)
 
-		if len(matches) != 2 {
+		if len(matches) != lenValidIPv6 {
 			return nil, ErrNoIPAvailable
 		}
 
@@ -150,7 +155,7 @@ func (w *Service) getAvailableIPV6(devices []*models.Device) (*net.IP, error) {
 
 		var address *netaddr.IPv6
 		for i := 0; i < retries; i++ {
-			address = netaddr.NewIPv6(subnet.NetId(), rand.Uint64())
+			address = netaddr.NewIPv6(subnet.NetId(), rnd.Uint64())
 
 			if address.String() == w.subnet.GatewayV6 {
 				err = ErrNoIPAvailable

@@ -7,10 +7,11 @@ import (
 
 // Migrate : Migrate database version
 func Migrate(db *gorm.DB) error {
+	const maxColumnSize = 190
 	m := gomigrate.New(db, &gomigrate.Options{
 		TableName:                 "migration",
 		IDColumnName:              "id",
-		IDColumnSize:              190,
+		IDColumnSize:              maxColumnSize,
 		UseTransaction:            false,
 		ValidateUnknownMigrations: true,
 	}, Migrations())

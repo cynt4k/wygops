@@ -30,7 +30,6 @@ func (h *Handlers) Setup(e *echo.Group) {
 	api := e.Group("/v1")
 
 	api.GET("/", func(c echo.Context) error { return c.String(http.StatusOK, http.StatusText(http.StatusOK)) })
-
 }
 
 // Init : Initialize the v1 Routes

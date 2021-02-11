@@ -21,11 +21,12 @@ func NewService(repo repository.Repository, hub *hub.Hub, logger *zap.Logger) *S
 		logger: logger,
 	}
 	go func() {
+		const capSize = 200
 		topics := make([]string, 0, len(handlerMap))
 		for k := range handlerMap {
 			topics = append(topics, k)
 		}
-		for msg := range hub.Subscribe(200, topics...).Receiver {
+		for msg := range hub.Subscribe(capSize, topics...).Receiver {
 			h, ok := handlerMap[msg.Topic()]
 			if ok {
 				go h(service, msg)
