@@ -65,7 +65,7 @@ func newEcho(logger *zap.Logger, config *config.Config, repo repository.Reposito
 
 	e.Use(middlewares.RequestID())
 	e.Use(middlewares.AccessLogging(logger.Named("access_log"), config.DevMode))
-	e.Use(extension.Wrap(repo))
+	e.Use(extension.Wrap(repo, *config))
 	e.Use(middlewares.RequestCounter())
 	e.Use(middlewares.HTTPDuration())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{

@@ -17,6 +17,15 @@ var (
 	ErrForbidden = errors.New("forbidden")
 )
 
+type ArgumentError struct {
+	FieldName string
+	Message   string
+}
+
+func (ae *ArgumentError) Error() string {
+	return ae.Message
+}
+
 func convertError(err error) error {
 	switch {
 	case gorm.IsRecordNotFoundError(err):

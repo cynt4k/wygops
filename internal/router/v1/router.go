@@ -3,7 +3,9 @@ package v1
 import (
 	"net/http"
 
+	"github.com/cynt4k/wygops/cmd/config"
 	"github.com/cynt4k/wygops/internal/repository"
+	"github.com/cynt4k/wygops/internal/router/middlewares"
 	"github.com/cynt4k/wygops/internal/services/ldap"
 	"github.com/cynt4k/wygops/internal/services/wireguard"
 	"github.com/labstack/echo/v4"
@@ -16,6 +18,7 @@ type Handlers struct {
 	Repo      repository.Repository
 	Bus       *hub.Hub
 	Logger    *zap.Logger
+	Config    *config.Config
 	LDAP      ldap.LDAP
 	Wireguard wireguard.Wireguard
 }
@@ -27,9 +30,24 @@ type Config struct {
 }
 
 func (h *Handlers) Setup(e *echo.Group) {
-	api := e.Group("/v1")
+	apiNoAuth := e.Group("/v1")
+	{
+		apiNoAuth.GET("/", func(c echo.Context) error { return c.String(http.StatusOK, http.StatusText(http.StatusOK)) })
 
-	api.GET("/", func(c echo.Context) error { return c.String(http.StatusOK, http.StatusText(http.StatusOK)) })
+		apiNoAuthAuth := apiNoAuth.Group("/auth")
+		{
+			apiNoAuthAuth.POST("/login", h.LoginUser)
+			apiNoAuthAuth.POST("/logout", h.LogoutUser)
+		}
+	}
+
+	api := e.Group("/v1", middlewares.CheckAuthentification(h.Config.API.JWT.Secret))
+	{
+		apiProfile := api.Group("/profile")
+		{
+			apiProfile.GET("", h.GetOwnProfile)
+		}
+	}
 }
 
 // Init : Initialize the v1 Routes

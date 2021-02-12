@@ -60,10 +60,16 @@ type Provider struct {
 	Ldap ProviderLdap `yaml:"ldap"`
 }
 
+type APIJWT struct {
+	Secret   string `yaml:"secret"`
+	LifeTime string `yaml:"lifetime"`
+}
+
 // API : Config struct for the api
 type API struct {
 	Host string `yaml:"host"`
 	Port int16  `yaml:"port"`
+	JWT  APIJWT `yaml:"jwt"`
 }
 
 // Wireguard : Config struct for wireguard

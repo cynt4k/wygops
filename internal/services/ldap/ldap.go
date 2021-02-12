@@ -21,4 +21,5 @@ type LDAP interface {
 	FindUser(name string, recursiveGroup bool) (*User, error)
 	GetGroup(name string, recursive bool) (*Group, error)
 	GetGroupAndUsers(name string, recursive bool) (*Group, error)
+	CheckLogin(username string, password string) (bool, error)
 }

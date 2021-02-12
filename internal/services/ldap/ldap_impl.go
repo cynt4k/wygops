@@ -22,32 +22,37 @@ func NewService(repo repository.Repository, config *config.Config) (LDAP, error)
 		repo:   repo,
 		config: &config.Provider.Ldap,
 	}
-	return ldap, ldap.connect()
+	connection, err := ldap.connect()
+
+	if err != nil {
+		return nil, err
+	}
+
+	ldap.connection = connection
+	return ldap, nil
 }
 
-func (s *Service) connect() error {
+func (s *Service) connect() (*ldapgo.Conn, error) {
 	connection, err := ldapgo.Dial("tcp", fmt.Sprintf("%s:%d", s.config.Host, s.config.Port))
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// TODO: add ssl certificate
 	if s.config.Type == "tls" {
 		err = connection.StartTLS(&tls.Config{InsecureSkipVerify: true}) // nolint:gosec
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	err = connection.Bind(s.config.BindDn, s.config.BindPassword)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	s.connection = connection
-	return nil
+	return connection, nil
 }
 
 func (s *Service) disconnect() {
