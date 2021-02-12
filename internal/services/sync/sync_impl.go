@@ -69,6 +69,8 @@ func newService(
 		return nil, err
 	}
 
+	service.initEventhandler()
+
 	return service, nil
 }
 
@@ -85,4 +87,20 @@ func (s *Service) Start() error {
 // Stop : Stop the sync service
 func (s *Service) Stop() error {
 	return nil
+}
+
+func (s *Service) initEventhandler() {
+	go func() {
+		const capSize = 200
+		topics := make([]string, 0, len(handlerMap))
+		for k := range handlerMap {
+			topics = append(topics, k)
+		}
+		for msg := range s.hub.Subscribe(capSize, topics...).Receiver {
+			h, ok := handlerMap[msg.Topic()]
+			if ok {
+				go h(s, msg)
+			}
+		}
+	}()
 }
