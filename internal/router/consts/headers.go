@@ -8,4 +8,5 @@ const (
 	HeaderIfModifiedSince   = "If-Modified-Since"
 	HeaderIfUnmodifiedSince = "If-Unmodified-Since"
 	HeaderAPIKey            = "X-API-Key"
+	HeaderAuthorization     = "Authorization"
 )

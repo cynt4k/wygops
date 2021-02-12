@@ -1,8 +1,12 @@
 package extension
 
 import (
+	"github.com/cynt4k/wygops/cmd/config"
 	"github.com/cynt4k/wygops/internal/repository"
 	"github.com/cynt4k/wygops/internal/router/consts"
+	"github.com/cynt4k/wygops/internal/router/extension/herror"
+	"github.com/cynt4k/wygops/internal/router/utils"
+	vd "github.com/go-ozzo/ozzo-validation/v4"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/labstack/echo/v4"
 )
@@ -51,11 +55,25 @@ func json(c echo.Context, code int, i interface{}, cfg jsoniter.StreamPool) erro
 	return stream.Flush()
 }
 
-func Wrap(repo repository.Repository) echo.MiddlewareFunc {
+func Wrap(repo repository.Repository, config config.Config) echo.MiddlewareFunc {
 	return func(n echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			c.Set(consts.KeyRepo, repo)
+			c.Set(consts.KeyConfig, config)
 			return n(&Context{Context: c})
 		}
 	}
+}
+
+func BindAndValidate(c echo.Context, i interface{}, rules ...vd.Rule) error {
+	if err := c.Bind(i); err != nil {
+		return err
+	}
+	if err := vd.ValidateWithContext(utils.NewRequestValidateContext(c), i, rules...); err != nil {
+		if e, ok := err.(vd.InternalError); ok {
+			return herror.InternalServerError(e.InternalError())
+		}
+		return herror.BadRequest(err)
+	}
+	return nil
 }
