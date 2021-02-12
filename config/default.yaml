@@ -38,3 +38,7 @@ provider:
 api:
   host: "0.0.0.0"
   port: 3000
+  jwt: 
+    secret: b34afe530b019d7bb7f9b69ebe20b9725a01519743aa4e37d8a99b5304fa51a3
+    lifetime: 2h
+  
