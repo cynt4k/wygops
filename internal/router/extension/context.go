@@ -32,6 +32,11 @@ func (c *Context) JSON(code int, i interface{}) (err error) {
 			Code:     code,
 			Response: res,
 		})
+	case *Response:
+		return c.Context.JSON(code, &response{
+			Code:     code,
+			Response: *res,
+		})
 	default:
 		return c.Context.JSON(code, &response{
 			Code: code,
