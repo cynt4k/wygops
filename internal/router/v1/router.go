@@ -46,6 +46,7 @@ func (h *Handlers) Setup(e *echo.Group) {
 		apiProfile := api.Group("/profile")
 		{
 			apiProfile.GET("", h.GetOwnProfile)
+			apiProfile.PATCH("/protect", h.UserSetProtectPassword)
 		}
 	}
 }
