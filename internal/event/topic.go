@@ -35,6 +35,12 @@ type UserCreatedEvent struct {
 	Username string
 }
 
+// UserUpdatedEvent : Event when user was updated
+type UserUpdatedEvent struct {
+	UserID   uint
+	Username string
+}
+
 // UserDeletedEvent : Event when user was deleted
 type UserDeletedEvent struct {
 	UserID uint

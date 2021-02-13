@@ -103,6 +103,51 @@ func getUser(tx *gorm.DB, withDevices bool, where ...interface{}) (*models.User,
 	return &user, nil
 }
 
+func (repo *GormRepository) UpdateUser(userID uint, args UpdateUserArgs) (*models.User, error) {
+	var (
+		changed bool
+		count   int
+		u       models.User
+	)
+
+	err := repo.db.Transaction(func(tx *gorm.DB) error {
+		changes := map[string]interface{}{}
+
+		if err := tx.First(&u, models.User{ID: userID}).Error; err != nil {
+			return convertError(err)
+		}
+
+		if args.ProtectPassword.Valid {
+			changes["protect_password"] = args.ProtectPassword.String
+		}
+
+		if len(changes) > 0 {
+			if err := tx.Model(&u).Updates(changes).Error; err != nil {
+				return err
+			}
+			changed = true
+			count += len(changes)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if changed {
+		msg, _ := structs.StructToMap(event.UserUpdatedEvent{
+			UserID:   userID,
+			Username: u.Username,
+		})
+		repo.hub.Publish(hub.Message{
+			Name:   event.UserUpdated,
+			Fields: msg,
+		})
+	}
+	return &u, nil
+}
+
 // DeleteUser : Delete an user
 func (repo *GormRepository) DeleteUser(userID uint) error {
 	err := repo.db.Transaction(func(tx *gorm.DB) error {
