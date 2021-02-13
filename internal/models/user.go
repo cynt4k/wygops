@@ -8,6 +8,7 @@ import (
 	"github.com/cynt4k/wygops/pkg/util/cryptutil"
 	"github.com/cynt4k/wygops/pkg/util/randutil"
 	vd "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -53,7 +54,7 @@ func DecryptCipher(cipherText string, password string) (string, error) {
 }
 
 // BeforeSave : Hook before saving the user
-func (u *User) BeforeSave() error {
+func (u *User) BeforeCreate() error {
 	if u.Type != "ldap" {
 		hashedPassword, err := Hash(u.Password)
 		if err != nil {
@@ -80,6 +81,38 @@ func (u *User) BeforeSave() error {
 		}
 
 		u.Cipher = cipher
+	}
+	return nil
+}
+
+// BeforeUpdate : Hook before updating the user
+func (u *User) BeforeUpdate(tx *gorm.Scope) error {
+	var oldUser User
+	if err := tx.DB().First(&oldUser, User{ID: u.ID}).Error; err != nil {
+		return err
+	}
+	// TODO: handle update protect password
+	if oldUser.ProtectPassword == "" && u.ProtectPassword != "" {
+		hashedProtectedPassword, err := Hash(u.ProtectPassword)
+		if err != nil {
+			return err
+		}
+		u.ProtectPassword = string(hashedProtectedPassword)
+		if u.Cipher == "" {
+			const randLength = 64
+			u.Cipher = randutil.RandStringRunes(randLength)
+		}
+
+		cipher, err := EncryptCipher(u.Cipher, u.ProtectPassword)
+
+		if err != nil {
+			return err
+		}
+
+		u.Cipher = cipher
+
+		_ = tx.SetColumn("ProtectPassword", u.ProtectPassword)
+		_ = tx.SetColumn("Cipher", u.Cipher)
 	}
 	return nil
 }
